@@ -1,6 +1,7 @@
 import { getModelForClass, prop, defaultClasses, modelOptions, Ref } from '@typegoose/typegoose';
 import { UserEntity } from '../user/enteties.js';
 import { AccommodationType, CityType, ConvenienceType } from '../../models/rent-offer.js';
+import { UUID } from 'node:crypto';
 
 
 @modelOptions({
@@ -60,6 +61,9 @@ export class OfferEntity extends defaultClasses.TimeStamps {
 
   @prop({ required: true })
   public commentCount!: number;
+
+  @prop({ required: true })
+  public favouriteUsers: UUID[] = [];
 }
 
 export const OfferModel = getModelForClass(OfferEntity);

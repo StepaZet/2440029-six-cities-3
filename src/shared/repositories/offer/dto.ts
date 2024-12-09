@@ -1,28 +1,31 @@
 import Joi from 'joi';
 import { Types } from 'mongoose';
 import { AccommodationType, CityType, ConvenienceType } from '../../models/rent-offer.js';
+import { UUID } from 'node:crypto';
 
 export class CreateOfferDto {
-  constructor(
-  public name: string,
-  public description: string,
-  public city: CityType,
-  public previewUrl: string,
-  public imagesUrls: string[],
-  public createdAt: Date,
-  public rating: number,
-  public commentCount: number,
-  public isPremium: boolean,
-  public isFavorite: boolean,
-  public accommodationType: AccommodationType,
-  public roomCount: number,
-  public guestCount: number,
-  public rentPrice: number,
-  public conveniences: ConvenienceType[],
-  public authorId: Types.ObjectId,
-  public latitude: number,
-  public longitude: number,
-  ) {}
+  public name!: string;
+  public description!: string;
+  public city!: CityType;
+  public previewUrl!: string;
+  public imagesUrls!: string[];
+  public createdAt!: Date;
+  public rating!: number;
+  public commentCount!: number;
+  public isPremium!: boolean;
+  public isFavorite!: boolean;
+  public accommodationType!: AccommodationType;
+  public roomCount!: number;
+  public guestCount!: number;
+  public rentPrice!: number;
+  public conveniences!: ConvenienceType[];
+  public authorId!: Types.ObjectId;
+  public latitude!: number;
+  public longitude!: number;
+}
+
+export class UpdateOfferDto extends CreateOfferDto {
+  public id!: UUID;
 }
 
 export const createOfferDtoSchema = Joi.object({
