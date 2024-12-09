@@ -1,54 +1,37 @@
-import { readFileSync } from 'node:fs';
 import { FileReader } from './file-reader.interface.js';
+import { createReadStream } from 'node:fs';
+import { EventEmitter } from 'node:events';
 
-import chalk from 'chalk';
-import { User } from '../../types/user.js';
-import { AccommodationType, Convenience, RentOffer } from '../../types/rent-offer.js';
+const CHUNK_SIZE = 16384;
 
-export class TSVFileReader implements FileReader {
-  private rawData: string = '';
-
+export class TsvFileReader extends EventEmitter implements FileReader {
   constructor(
-    private readonly filePath: string
-  ) { }
-
-  read(): void {
-    try {
-      this.rawData = readFileSync(this.filePath, { encoding: 'utf-8' });
-    } catch (error: unknown) {
-      console.error(chalk.red(`Failed to read file from ${this.filePath}`));
-    }
+    private readonly filename: string
+  ) {
+    super();
   }
 
-  public toArray(): RentOffer[] {
-    if (!this.rawData) {
-      throw new Error('File was not read');
+  public async read(): Promise<void> {
+    const stream = createReadStream(this.filename, {
+      highWaterMark: CHUNK_SIZE,
+      encoding: 'utf-8'
+    });
+
+    let remainingData = '';
+    let nextLinePosition = -1;
+    let importedRowCount = 0;
+
+    for await (const chunk of stream) {
+      remainingData += chunk.toString();
+
+      while ((nextLinePosition = remainingData.indexOf('\n')) >= 0) {
+        const completeRow = remainingData.slice(0, nextLinePosition);
+        remainingData = remainingData.slice(++nextLinePosition);
+        importedRowCount++;
+        this.emit('readline', completeRow);
+      }
     }
 
-    return this.rawData
-      .split('\n')
-      .filter((row) => row.trim().length > 0)
-      .map((line) => line.split('\t'))
-      .map(([title, description, date, city, previewImage, images, isPremium, isFavorite, rating, type, roomCount, guestCount, rentPrice, conveniences, firstName, lastName, email, avatarPath, commentCount, coordinates]) => ({
-        title,
-        description,
-        date: new Date(date),
-        city,
-        previewImage,
-        images: images.split(' '),
-        isPremium: Boolean(isPremium),
-        isFavorite: Boolean(isFavorite),
-        rating: Number.parseInt(rating, 10),
-        type: type as AccommodationType,
-        roomCount: Number.parseInt(roomCount, 10),
-        guestCount: Number.parseInt(guestCount, 10),
-        rentPrice: Number.parseInt(rentPrice, 10),
-        conveniences: conveniences.split(' ')
-          .map((convenience) => convenience as Convenience),
-        author: {firstName, lastName, email, avatarPath} as User,
-        commentCount: Number.parseInt(commentCount, 10),
-        coordinates
-      }));
+    this.emit('end', importedRowCount);
   }
-
 }

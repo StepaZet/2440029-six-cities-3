@@ -1,5 +1,3 @@
-import { User } from './user.js';
-
 export enum AccommodationType {
   apartment = 'Apartment',
   house = 'House',
@@ -7,7 +5,7 @@ export enum AccommodationType {
   hotel = 'Hotel'
 }
 
-export enum Convenience {
+export enum ConvenienceType {
   Breakfast = 'Breakfast',
   AirConditioning = 'Air conditioning',
   LaptopFriendlyWorkspace = 'Laptop friendly workspace',
@@ -31,8 +29,9 @@ export type RentOffer = {
   roomCount: number;
   guestCount: number;
   rentPrice: number;
-  conveniences: Convenience[];
-  author: User;
+  conveniences: ConvenienceType[];
+  authorUrl: string;
+  latitude: number;
+  longitude: number;
   commentCount: number;
-  coordinates: string;
 }
