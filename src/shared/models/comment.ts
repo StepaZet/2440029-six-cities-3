@@ -2,7 +2,7 @@ import { User } from './user.js';
 
 export type Comment = {
   text: string;
-  date: Date;
+  createdAt: Date;
   rating: number;
   author: User;
 }

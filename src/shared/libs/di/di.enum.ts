@@ -6,5 +6,7 @@ export enum DIType {
   UserModel = 'UserModel',
   OfferRepository = 'OfferRepository',
   OfferModel = 'OfferModel',
-  DBClient = 'DBClient'
+  DBClient = 'DBClient',
+  CommentRepository = 'CommentRepository',
+  CommentModel = 'CommentModel'
 }
