@@ -16,6 +16,11 @@ export class DefaultOfferRepository implements OfferRepository {
     @inject(DIType.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>
   ) {}
 
+  public async checkIdExists(id: Types.ObjectId): Promise<boolean> {
+    const result = await this.offerModel.findById(id);
+    return Boolean(result);
+  }
+
   public async create(dto: OfferDto): Promise<DocumentType<OfferEntity>> {
     const result = this.offerModel.create(dto);
 

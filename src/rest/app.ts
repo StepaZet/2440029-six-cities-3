@@ -59,6 +59,7 @@ export class App {
 
   private async configureMiddlewares(app: express.Application) {
     app.use(express.json());
+    app.use(express.static(this.config.get('STATIC_ROOT')));
     app.use((req, _res, next) => {
       this.logger.info(`Catch request: ${req.method} ${req.url}`);
       next();
