@@ -1,5 +1,10 @@
 export enum DIType {
   App = 'App',
-  Looger = 'Logger',
+  Logger = 'Logger',
   Config = 'Config',
+  UserRepository = 'UserRepository',
+  UserModel = 'UserModel',
+  OfferRepository = 'OfferRepository',
+  OfferModel = 'OfferModel',
+  DBClient = 'DBClient'
 }

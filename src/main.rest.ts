@@ -2,20 +2,19 @@ import 'reflect-metadata';
 import { Container } from 'inversify';
 import { DIType } from './shared/libs/di/di.enum.js';
 import { App } from './rest/app.js';
-import { Config } from './shared/libs/config/config.interface.js';
-import { Logger } from './shared/libs/logging/logger.interface.js';
-import { AppSchema } from './shared/libs/config/app.schema.js';
-import { PinoLogger } from './shared/libs/logging/pino.logger.js';
-import { AppConfig } from './shared/libs/config/app.config.js';
+import { createUserContainer } from './shared/repositories/user/user.container.js';
+import { createOfferContainer } from './shared/repositories/offer/offer.container.js';
+import { createAppContainer } from './rest/app.container.js';
 
 async function bootstrap() {
-  const container = new Container();
-  container.bind<Logger>(DIType.Looger).to(PinoLogger).inSingletonScope();
-  container.bind<Config<AppSchema>>(DIType.Config).to(AppConfig).inSingletonScope();
-  container.bind<App>(DIType.App).to(App).inSingletonScope();
+  const container = Container.merge(
+    createAppContainer(),
+    createUserContainer(),
+    createOfferContainer()
+  );
 
-  const app = container.get<App>(DIType.App);
-  await app.init();
+  const application = container.get<App>(DIType.App);
+  await application.init();
 }
 
 bootstrap();
