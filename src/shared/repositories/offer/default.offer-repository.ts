@@ -6,7 +6,7 @@ import { inject, injectable } from 'inversify';
 import { DIType } from '../../libs/di/di.enum.js';
 import { OfferEntity } from './enteties.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
-import { OfferDto } from './dto.js';
+import { OfferDto, UpdateOfferDto } from './dto.js';
 import { CityType } from '../../models/rent-offer.js';
 
 @injectable()
@@ -27,7 +27,7 @@ export class DefaultOfferRepository implements OfferRepository {
     return this.offerModel.findById(id).exec();
   }
 
-  public async change(id: Types.ObjectId, dto: OfferDto): Promise<DocumentType<OfferEntity> | null> {
+  public async change(id: Types.ObjectId, dto: UpdateOfferDto): Promise<DocumentType<OfferEntity> | null> {
     const result = await this.offerModel.findByIdAndUpdate(id, dto).exec();
     this.logger.info(`Update offer: ${result?.name}`);
     return result;

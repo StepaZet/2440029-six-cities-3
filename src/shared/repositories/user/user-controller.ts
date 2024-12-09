@@ -6,7 +6,8 @@ import { plainToInstance } from 'class-transformer';
 import { DIType } from '../../libs/di/di.enum.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { UserRepository } from './user-repository.interface.js';
-import { CreateUserDto } from './dto.js';
+import { CreateUserDto, createUserDtoSchema } from './dto.js';
+import { SchemaValidatorMiddleware } from '../../libs/rest/schema-validator.middleware.js';
 
 
 @injectable()
@@ -17,10 +18,10 @@ export class UserController extends ControllerBase {
   ) {
     super(logger);
 
-    this.addRoute({path: '/', httpMethod: HttpMethod.Post, handleAsync: this.createUserAsync});
+    this.addRoute({path: '/', httpMethod: HttpMethod.Post, handleAsync: this.create.bind(this), middlewares: [new SchemaValidatorMiddleware(createUserDtoSchema)]});
   }
 
-  private async createUserAsync(req: Request, res: Response): Promise<void> {
+  private async create(req: Request, res: Response): Promise<void> {
     const dto = plainToInstance(CreateUserDto, req.body as object);
     const user = await this.userRepository.create(dto);
     this.created(res, user);

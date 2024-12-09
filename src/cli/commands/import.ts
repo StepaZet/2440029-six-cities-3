@@ -78,8 +78,6 @@ export class ImportCommand implements Command {
       previewUrl: offer.previewUrl,
       imagesUrls: offer.imagesUrls,
       isPremium: offer.isPremium,
-      isFavorite: offer.isFavorite,
-      rating: offer.rating,
       accommodationType: offer.accommodationType,
       roomCount: offer.roomCount,
       guestCount: offer.guestCount,
@@ -88,7 +86,6 @@ export class ImportCommand implements Command {
       authorId: user.id,
       latitude: offer.latitude,
       longitude: offer.longitude,
-      commentCount: offer.commentCount
     });
   }
 }

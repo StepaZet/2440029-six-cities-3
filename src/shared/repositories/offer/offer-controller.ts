@@ -10,7 +10,9 @@ import { OfferRepository } from './offer-repository.interface.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { CityType } from '../../models/rent-offer.js';
 import { HttpError } from '../../libs/rest-exceptions/http-error.js';
-import { OfferDto } from './dto.js';
+import { createOfferDtoSchema, OfferDto, updateOfferDtoSchema } from './dto.js';
+import { SchemaValidatorMiddleware } from '../../libs/rest/schema-validator.middleware.js';
+import { ObjectIdValidatorMiddleware } from '../../libs/rest/object-id-validator.middleware.js';
 
 @injectable()
 export class OfferController extends ControllerBase {
@@ -19,20 +21,20 @@ export class OfferController extends ControllerBase {
     @inject(DIType.OfferRepository) private offerRepository: OfferRepository,
   ) {
     super(logger);
-    this.addRoute({path: '/premium/:city', httpMethod: HttpMethod.Delete, handleAsync: this.getPremiumOffersForCityAsync.bind(this)});
+    this.addRoute({path: '/premium/:city', httpMethod: HttpMethod.Delete, handleAsync: this.indexPremiumForCity.bind(this)});
 
-    this.addRoute({path: '/favourite', httpMethod: HttpMethod.Get, handleAsync: this.getFavouriteOffersForUserAsync.bind(this)});
-    this.addRoute({path: '/favourite/:id', httpMethod: HttpMethod.Post, handleAsync: this.addOfferToFavouriteAsync.bind(this)});
-    this.addRoute({path: '/favourite/:id', httpMethod: HttpMethod.Delete, handleAsync: this.removeOfferFromFavouriteAsync.bind(this)});
+    this.addRoute({path: '/favourite', httpMethod: HttpMethod.Get, handleAsync: this.indexFavouriteForUser.bind(this)});
+    this.addRoute({path: '/favourite/:id', httpMethod: HttpMethod.Post, handleAsync: this.addToFavourite.bind(this), middlewares: [new ObjectIdValidatorMiddleware('id')]});
+    this.addRoute({path: '/favourite/:id', httpMethod: HttpMethod.Delete, handleAsync: this.removeFromFavourite.bind(this), middlewares: [new ObjectIdValidatorMiddleware('id')]});
 
-    this.addRoute({path: '/', httpMethod: HttpMethod.Get, handleAsync: this.getOffersAsync.bind(this)});
-    this.addRoute({path: '/', httpMethod: HttpMethod.Post, handleAsync: this.createOfferAsync.bind(this)});
-    this.addRoute({path: '/:id', httpMethod: HttpMethod.Get, handleAsync: this.findOfferByIdAsync.bind(this)});
-    this.addRoute({path: '/:id', httpMethod: HttpMethod.Put, handleAsync: this.changeOfferByIdAsync.bind(this)});
-    this.addRoute({path: '/:id', httpMethod: HttpMethod.Delete, handleAsync: this.deleteOfferById.bind(this)});
+    this.addRoute({path: '/', httpMethod: HttpMethod.Get, handleAsync: this.index.bind(this)});
+    this.addRoute({path: '/', httpMethod: HttpMethod.Post, handleAsync: this.create.bind(this), middlewares: [new SchemaValidatorMiddleware(createOfferDtoSchema)]});
+    this.addRoute({path: '/:id', httpMethod: HttpMethod.Get, handleAsync: this.showById.bind(this), middlewares: [new ObjectIdValidatorMiddleware('id')]});
+    this.addRoute({path: '/:id', httpMethod: HttpMethod.Put, handleAsync: this.updateById.bind(this), middlewares: [new ObjectIdValidatorMiddleware('id'), new SchemaValidatorMiddleware(updateOfferDtoSchema)]});
+    this.addRoute({path: '/:id', httpMethod: HttpMethod.Delete, handleAsync: this.deleteById.bind(this), middlewares: [new ObjectIdValidatorMiddleware('id')]});
   }
 
-  private async getOffersAsync(req: Request, res: Response): Promise<void> {
+  private async index(req: Request, res: Response): Promise<void> {
     const { limit, skip } = req.query;
 
     const defaultLimit = 20;
@@ -53,14 +55,14 @@ export class OfferController extends ControllerBase {
     this.ok(res, offers);
   }
 
-  private async createOfferAsync(req: Request, res: Response): Promise<void> {
+  private async create(req: Request, res: Response): Promise<void> {
     const dto = plainToInstance(OfferDto, req.body as object);
     dto.authorId = new Types.ObjectId();
     const offer = await this.offerRepository.create(dto);
     this.created(res, offer);
   }
 
-  private async findOfferByIdAsync(req: Request, res: Response): Promise<void> {
+  private async showById(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -71,7 +73,7 @@ export class OfferController extends ControllerBase {
     this.ok(res, offer);
   }
 
-  private async changeOfferByIdAsync(req: Request, res: Response): Promise<void> {
+  private async updateById(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -83,7 +85,7 @@ export class OfferController extends ControllerBase {
     this.ok(res, offer);
   }
 
-  private async deleteOfferById(req: Request, res: Response): Promise<void> {
+  private async deleteById(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
 
     if (!isValidObjectId(id)) {
@@ -94,7 +96,7 @@ export class OfferController extends ControllerBase {
     this.noContent(res);
   }
 
-  private async getPremiumOffersForCityAsync(req: Request, res: Response): Promise<void> {
+  private async indexPremiumForCity(req: Request, res: Response): Promise<void> {
     const { city } = req.params;
 
     const cityValue = city as CityType;
@@ -122,15 +124,15 @@ export class OfferController extends ControllerBase {
     this.ok(res, offers);
   }
 
-  private async getFavouriteOffersForUserAsync(_req: Request, _res: Response): Promise<void> {
+  private async indexFavouriteForUser(_req: Request, _res: Response): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  private async addOfferToFavouriteAsync(_req: Request, _res: Response): Promise<void> {
+  private async addToFavourite(_req: Request, _res: Response): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  private async removeOfferFromFavouriteAsync(_req: Request, _res: Response): Promise<void> {
+  private async removeFromFavourite(_req: Request, _res: Response): Promise<void> {
     throw new Error('Method not implemented.');
   }
 

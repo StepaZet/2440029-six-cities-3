@@ -11,5 +11,6 @@ export enum DIType {
   CommentModel = 'CommentModel',
   UserController = 'UserController',
   OfferController = 'OfferController',
+  CommentController = 'CommentController',
   ExceptionFilter = 'ExceptionFilter',
 }
