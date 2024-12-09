@@ -15,6 +15,11 @@ export class DefaultUserRepository implements UserRepository {
     @inject(DIType.UserModel) private readonly userModel: types.ModelType<UserEntity>
   ) {}
 
+  public async checkIdExists(id: Types.ObjectId): Promise<boolean> {
+    const result = await this.userModel.findById(id);
+    return Boolean(result);
+  }
+
   public async create(schema: CreateUserDto): Promise<DocumentType<UserEntity>> {
     const user = new UserEntity(schema);
     user.setPassword(schema.password);

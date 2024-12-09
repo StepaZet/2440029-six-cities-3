@@ -10,6 +10,7 @@ export type AppSchema = {
   DATABASE_USER: string,
   DATABASE_PASSWORD: string,
   DATABASE_NAME: string,
+  STATIC_ROOT: string,
   SALT: string
 }
 
@@ -49,6 +50,12 @@ export const configAppSchema = convict<AppSchema>({
     format: String,
     env: 'DATABASE_NAME',
     default: 'six-cities'
+  },
+  STATIC_ROOT: {
+    doc: 'Root path for static files',
+    format: String,
+    env: 'STATIC_ROOT',
+    default: null
   },
   SALT: {
     doc: 'Salt',

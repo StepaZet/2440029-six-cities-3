@@ -21,8 +21,8 @@ export class CommentController extends ControllerBase {
   ) {
     super(logger);
 
-    this.addRoute({path: '/:id/comments', httpMethod: HttpMethod.Get, handleAsync: this.index.bind(this), middlewares: [new ObjectIdValidatorMiddleware('id')]});
-    this.addRoute({path: '/:id/comments', httpMethod: HttpMethod.Post, handleAsync: this.create.bind(this), middlewares: [new ObjectIdValidatorMiddleware('id'), new SchemaValidatorMiddleware(createCommentDtoSchema)]});
+    this.addRoute({path: '/:id/comments', httpMethod: HttpMethod.Get, handleAsync: this.index.bind(this), middlewares: [new ObjectIdValidatorMiddleware(this.commentService, 'id')]});
+    this.addRoute({path: '/:id/comments', httpMethod: HttpMethod.Post, handleAsync: this.create.bind(this), middlewares: [new SchemaValidatorMiddleware(createCommentDtoSchema), new ObjectIdValidatorMiddleware(this.commentService, 'id')]});
   }
 
   private async create(req: Request, res: Response): Promise<void> {

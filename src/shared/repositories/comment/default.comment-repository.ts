@@ -18,6 +18,11 @@ export class DefaultCommentRepository implements CommentRepository {
     @inject(DIType.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>
   ) {}
 
+  public async checkIdExists(id: Types.ObjectId): Promise<boolean> {
+    const result = await this.commentModel.findById(id);
+    return Boolean(result);
+  }
+
   public async create(dto: CreateCommentDto): Promise<DocumentType<CommentEntity>> {
     const result = await this.commentModel.create(dto);
 
