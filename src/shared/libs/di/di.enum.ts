@@ -8,5 +8,8 @@ export enum DIType {
   OfferModel = 'OfferModel',
   DBClient = 'DBClient',
   CommentRepository = 'CommentRepository',
-  CommentModel = 'CommentModel'
+  CommentModel = 'CommentModel',
+  UserController = 'UserController',
+  OfferController = 'OfferController',
+  ExceptionFilter = 'ExceptionFilter',
 }

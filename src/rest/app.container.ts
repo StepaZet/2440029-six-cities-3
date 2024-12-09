@@ -8,6 +8,8 @@ import { AppSchema } from '../shared/libs/config/app.schema.js';
 import { MongoDatabaseClient } from '../shared/libs/db/mongo.db-client.js';
 import { AppConfig } from '../shared/libs/config/app.config.js';
 import { PinoLogger } from '../shared/libs/logging/pino.logger.js';
+import { ExceptionFilter } from '../shared/libs/rest-exceptions/exception-filter.interface.js';
+import { LoggingExceptionFilter } from '../shared/libs/rest-exceptions/logging-exception-filter.js';
 
 export function createAppContainer(): Container {
   const container = new Container();
@@ -16,6 +18,7 @@ export function createAppContainer(): Container {
   container.bind<Config<AppSchema>>(DIType.Config).to(AppConfig).inSingletonScope();
   container.bind<App>(DIType.App).to(App).inSingletonScope();
   container.bind<DBClient>(DIType.DBClient).to(MongoDatabaseClient).inSingletonScope();
+  container.bind<ExceptionFilter>(DIType.ExceptionFilter).to(LoggingExceptionFilter).inSingletonScope();
 
   return container;
 }

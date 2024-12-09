@@ -1,13 +1,13 @@
 import 'reflect-metadata';
 import { DocumentType, types } from '@typegoose/typegoose';
-import { inject, injectable } from 'inversify';
-
-import { DIType } from '../../libs/di/di.enum.js';
+import { Types } from 'mongoose';
 import { OfferRepository } from './offer-repository.interface.js';
-import { Logger } from '../../libs/logging/logger.interface.js';
+import { inject, injectable } from 'inversify';
+import { DIType } from '../../libs/di/di.enum.js';
 import { OfferEntity } from './enteties.js';
-import { CreateOfferDto, UpdateOfferDto } from './dto.js';
-import { UUID } from 'node:crypto';
+import { Logger } from '../../libs/logging/logger.interface.js';
+import { OfferDto } from './dto.js';
+import { CityType } from '../../models/rent-offer.js';
 
 @injectable()
 export class DefaultOfferRepository implements OfferRepository {
@@ -16,45 +16,45 @@ export class DefaultOfferRepository implements OfferRepository {
     @inject(DIType.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>
   ) {}
 
-  public async create(dto: CreateOfferDto): Promise<DocumentType<OfferEntity>> {
-    const result = await this.offerModel.create(dto);
-    this.logger.info(`New offer created: ${dto.name}`);
+  public async create(dto: OfferDto): Promise<DocumentType<OfferEntity>> {
+    const result = this.offerModel.create(dto);
 
+    this.logger.info(`New offer created: ${dto.name}`);
     return result;
   }
 
-  public async findById(id: UUID): Promise<DocumentType<OfferEntity> | null> {
-    return await this.offerModel.findById(id);
+  public async findById(id: Types.ObjectId): Promise<DocumentType<OfferEntity> | null> {
+    return this.offerModel.findById(id).exec();
   }
 
-  public async change(dto: UpdateOfferDto): Promise<DocumentType<OfferEntity> | null> {
-    const result = await this.offerModel.findByIdAndUpdate(dto.id, dto);
+  public async change(id: Types.ObjectId, dto: OfferDto): Promise<DocumentType<OfferEntity> | null> {
+    const result = await this.offerModel.findByIdAndUpdate(id, dto).exec();
     this.logger.info(`Update offer: ${result?.name}`);
     return result;
   }
 
-  public async deleteById(id: UUID): Promise<void> {
-    const result = this.offerModel.findByIdAndDelete(id);
-    this.logger.info(`Offer deleted: ${result.name}`);
+  public async deleteById(id: Types.ObjectId): Promise<void> {
+    const result = await this.offerModel.findByIdAndDelete(id).exec();
+    this.logger.info(`Offer deleted: ${result?.name}`);
   }
 
   public async findAll(limit: number, skip: number): Promise<DocumentType<OfferEntity>[]> {
-    return this.offerModel.find().skip(skip).limit(limit);
+    return this.offerModel.find().skip(skip).limit(limit).exec();
   }
 
-  public async findAllPremium(limit: number, skip: number): Promise<DocumentType<OfferEntity>[]> {
-    return this.offerModel.find({isPremium: true}).skip(skip).limit(limit);
+  public async findAllPremium(city: CityType, limit: number, skip: number): Promise<DocumentType<OfferEntity>[]> {
+    return this.offerModel.find({isPremium: true, city: city}).skip(skip).limit(limit).exec();
   }
 
-  public async findAllFavourite(userId: UUID, limit: number, skip: number): Promise<DocumentType<OfferEntity>[]> {
-    return this.offerModel.find({favouriteUsers: {'$in': [userId]}}).skip(skip).limit(limit);
+  public async findAllFavourite(userId: Types.ObjectId, limit: number, skip: number): Promise<DocumentType<OfferEntity>[]> {
+    return this.offerModel.find({favouriteUsers: {'$in': [userId]}}).skip(skip).limit(limit).exec();
   }
 
-  public async addToFavourite(orderId: UUID, userId: UUID): Promise<void> {
-    await this.offerModel.findByIdAndUpdate(orderId, {'$push': {favouriteUsers: userId}});
+  public async addToFavourite(orderId: Types.ObjectId, userId: Types.ObjectId): Promise<void> {
+    await this.offerModel.findByIdAndUpdate(orderId, {'$push': {favouriteUsers: userId}}).exec();
   }
 
-  public async removeFromFavourite(orderId: UUID, userId: UUID): Promise<void> {
-    await this.offerModel.findByIdAndUpdate(orderId, {'$pop': {favouriteUsers: userId}});
+  public async removeFromFavourite(orderId: Types.ObjectId, userId: Types.ObjectId): Promise<void> {
+    await this.offerModel.findByIdAndUpdate(orderId, {'$pop': {favouriteUsers: userId}}).exec();
   }
 }

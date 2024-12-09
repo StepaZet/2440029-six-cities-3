@@ -1,9 +1,8 @@
 import Joi from 'joi';
 import { Types } from 'mongoose';
 import { AccommodationType, CityType, ConvenienceType } from '../../models/rent-offer.js';
-import { UUID } from 'node:crypto';
 
-export class CreateOfferDto {
+export class OfferDto {
   public name!: string;
   public description!: string;
   public city!: CityType;
@@ -24,9 +23,6 @@ export class CreateOfferDto {
   public longitude!: number;
 }
 
-export class UpdateOfferDto extends CreateOfferDto {
-  public id!: UUID;
-}
 
 export const createOfferDtoSchema = Joi.object({
   name: Joi.string().min(10).max(100).required(),
