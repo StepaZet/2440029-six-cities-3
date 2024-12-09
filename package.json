@@ -15,11 +15,16 @@
     "compile": "tsc -p tsconfig.json",
     "clean": "rimraf dist",
     "ts": "ts-node",
-    "mock:server": "json-server ./mocks/mock-server-data.json --port 3123"
+    "mock:server": "json-server ./mocks/mock-server-data.json --port 3123",
+    "start:dev": "npm run build && node ./dist/main.rest.js | pino-pretty --colorize --translateTime"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.3.0",
+    "@types/convict": "^6.1.6",
+    "@types/convict-format-with-validator": "^6.0.5",
     "@types/node": "18.17.17",
+    "@types/pino": "^7.0.4",
+    "@types/pino-pretty": "^4.7.5",
     "@typescript-eslint/eslint-plugin": "6.7.0",
     "@typescript-eslint/parser": "6.7.0",
     "eslint": "8.49.0",
@@ -36,7 +41,12 @@
   },
   "dependencies": {
     "chalk": "^5.3.0",
+    "convict": "^6.2.4",
+    "convict-format-with-validator": "^6.2.0",
+    "dotenv": "^16.4.7",
     "got": "^14.4.5",
-    "json-server": "^1.0.0-beta.3"
+    "inversify": "^6.1.6",
+    "json-server": "^1.0.0-beta.3",
+    "pino-pretty": "^13.0.0"
   }
 }
