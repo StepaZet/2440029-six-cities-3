@@ -7,7 +7,7 @@ import { CommentRepository } from './comment-repository.interface.js';
 import { CommentEntity } from './enteties.js';
 import { OfferEntity } from '../offer/enteties.js';
 import { CreateCommentDto } from './dto.js';
-import { UUID } from 'node:crypto';
+import { Types } from 'mongoose';
 
 
 @injectable()
@@ -29,7 +29,7 @@ export class DefaultCommentRepository implements CommentRepository {
     return result;
   }
 
-  public async findAllForOffer(offerId: UUID, limit: number, skip: number): Promise<DocumentType<CommentEntity>[]> {
-    return await this.commentModel.find({offerId: offerId}).skip(skip).limit(limit);
+  public async findAllForOffer(offerId: Types.ObjectId, limit: number, skip: number): Promise<DocumentType<CommentEntity>[]> {
+    return await this.commentModel.find({offerId: offerId}).skip(skip).limit(limit).exec();
   }
 }

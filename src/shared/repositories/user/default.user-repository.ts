@@ -26,10 +26,10 @@ export class DefaultUserRepository implements UserRepository {
   }
 
   public async findById(id: Types.ObjectId): Promise<DocumentType<UserEntity> | null> {
-    return await this.userModel.findById(id);
+    return await this.userModel.findById(id).exec();
   }
 
   public async findByEmail(email: string): Promise<DocumentType<UserEntity> | null> {
-    return await this.userModel.findOne({ email });
+    return await this.userModel.findOne({ email }).exec();
   }
 }
