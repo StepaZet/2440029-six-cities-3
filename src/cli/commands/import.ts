@@ -1,24 +1,41 @@
-import { TSVFileReader } from '../../shared/libs/file-reader/tsv-file-reader.js';
+import { getErrorMessage } from '../../shared/helpers/random.js';
+import { TsvFileReader } from '../../shared/libs/file-reader/tsv-file-reader.js';
+import { OfferTsvParser } from '../../shared/libs/offer/offer-tsv-parser.js';
 import { Command } from './command.interface.js';
-import chalk from 'chalk';
 
 export class ImportCommand implements Command {
+  private readonly parser: OfferTsvParser = new OfferTsvParser();
 
-  public getName = (): string => '--import';
+  constructor() {
+    this.onImportedLine = this.onImportedLine.bind(this);
+    this.onCompleteImport = this.onCompleteImport.bind(this);
+  }
 
-  public execute(...parameters: string[]): void {
-    const [filePath] = parameters;
-    const fileReader = new TSVFileReader(filePath.trim());
+  public getName(): string {
+    return '--import';
+  }
+
+  public async execute(...args: string[]): Promise<void> {
+    const [fileName] = args;
+    const reader = new TsvFileReader(fileName.trim());
+
+    reader.on('readline', this.onImportedLine);
+    reader.on('end', this.onCompleteImport);
+
     try {
-      fileReader.read();
-      console.log(fileReader.toArray());
-    } catch (error) {
-      if (!(error instanceof Error)) {
-        throw error;
-      }
-
-      console.error(chalk.red(`Can't import data from file: ${filePath}.`));
-      console.error(`Details: ${error.message}`);
+      await reader.read();
+    } catch (error: unknown) {
+      console.error(`Can't import data from file: ${fileName}`);
+      console.error(`Details: ${getErrorMessage(error)}`);
     }
+  }
+
+  private onImportedLine(importedLine: string): void {
+    const offer = this.parser.parse(importedLine);
+    console.info(offer);
+  }
+
+  private onCompleteImport(importedRowCount: number) {
+    console.log(`Imported ${importedRowCount} rows`);
   }
 }
