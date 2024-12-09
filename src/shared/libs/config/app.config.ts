@@ -10,7 +10,7 @@ export class AppConfig implements Config<AppSchema> {
   private readonly config: AppSchema;
 
   constructor(
-    @inject(DIType.Looger) private readonly logger: Logger
+    @inject(DIType.Logger) private readonly logger: Logger
   ) {
     const parsedOutput = config();
 

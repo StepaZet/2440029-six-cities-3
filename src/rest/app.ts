@@ -7,7 +7,7 @@ import { AppSchema } from '../shared/libs/config/app.schema.js';
 @injectable()
 export class App {
   constructor(
-    @inject(DIType.Looger) private readonly logger: Logger,
+    @inject(DIType.Logger) private readonly logger: Logger,
     @inject(DIType.Config) private readonly config: Config<AppSchema>
   ) {}
 

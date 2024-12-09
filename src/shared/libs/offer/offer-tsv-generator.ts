@@ -1,10 +1,9 @@
 import dayjs from 'dayjs';
-import { faker } from '@faker-js/faker';
 import { OfferTsvParser } from './offer-tsv-parser.js';
-import { AccommodationType, ConvenienceType, RentOffer } from '../../models/rent-offer.js';
+import { AccommodationType, CityType, ConvenienceType, RentOffer } from '../../models/rent-offer.js';
 import { MockServerData } from '../../models/mock-server-data.js';
 import { Generator } from './generator.interface.js';
-import { generateRandomBoolean as getRandomBoolean, getRandomEnumValue, getRandomEnumValues, getRandomInt, getRandomItem, getRandomNumber } from '../../helpers/random.js';
+import { generateRandomBoolean as getRandomBoolean, getRandomEnumValue, getRandomEnumValues, getRandomInt, getRandomItem, getRandomNumber, getRandomUser } from '../../helpers/random.js';
 
 const MIN_DAY_OFFSET = 0;
 const MAX_DAY_OFFSET = 14;
@@ -29,17 +28,16 @@ export class OfferTsvGenerator implements Generator {
 
   generate(): string {
     const offerId = getRandomInt(MIN_OFFER_ID, MAX_OFFER_ID);
-    const author = getRandomItem(this.mockData.authors);
 
     const offer: RentOffer = {
-      title: getRandomItem(this.mockData.names),
+      name: getRandomItem(this.mockData.names),
       description: getRandomItem(this.mockData.descriptions),
-      date: dayjs()
+      createdAt: dayjs()
         .subtract(getRandomInt(MIN_DAY_OFFSET, MAX_DAY_OFFSET))
         .toDate(),
-      city: faker.location.city(),
-      previewImage: `https://six-cities.ru/images/${offerId}/0`,
-      images: [
+      city: getRandomEnumValue(CityType),
+      previewUrl: `https://six-cities.ru/images/${offerId}/0`,
+      imagesUrls: [
         `https://six-cities.ru/images/${offerId}/1`,
         `https://six-cities.ru/images/${offerId}/2`,
         `https://six-cities.ru/images/${offerId}/3`,
@@ -50,15 +48,15 @@ export class OfferTsvGenerator implements Generator {
       isPremium: getRandomBoolean(),
       isFavorite: getRandomBoolean(),
       rating: getRandomNumber(MIN_RATING, MAX_RATING, 1),
-      type: getRandomEnumValue(AccommodationType),
+      accommodationType: getRandomEnumValue(AccommodationType),
       roomCount: getRandomInt(MIN_ROOMS, MAX_ROOMS),
       guestCount: getRandomInt(MIN_GUESTS, MAX_GUESTS),
       rentPrice: getRandomNumber(MIN_COST, MAX_COST, 2),
       conveniences: getRandomEnumValues(ConvenienceType),
-      authorUrl: `https://six-cities/users/${author}`,
+      author: getRandomUser(),
       latitude: getRandomNumber(0, 90, 6),
       longitude: getRandomNumber(0, 180, 6),
-      commentCount: 0
+      commentCount: 0,
     };
     const parser = new OfferTsvParser();
 

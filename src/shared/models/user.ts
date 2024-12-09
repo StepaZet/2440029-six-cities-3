@@ -3,11 +3,11 @@ export enum UserType {
   pro = 'Pro'
 }
 
+
 export type User = {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
-  avatarPath?: string;
-  password?: string;
-  type?: UserType;
+  password: string;
+  type: UserType;
+  avatarUrl?: string;
 }

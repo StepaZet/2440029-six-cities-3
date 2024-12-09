@@ -1,4 +1,5 @@
-import { AccommodationType, ConvenienceType, RentOffer } from '../../models/rent-offer.js';
+import { AccommodationType, CityType, ConvenienceType, RentOffer } from '../../models/rent-offer.js';
+import { UserType } from '../../models/user.js';
 
 export class OfferTsvParser {
   constructor() {}
@@ -11,26 +12,32 @@ export class OfferTsvParser {
     }
 
     const splitString = trimString.split('\t');
-    const [title, description, date, city, previewImage, images, isPremium, isFavorite, rating, type, roomCount, guestCount, rentPrice, conveniences, authorUrl, latitude, longitude] = splitString;
+    const [name, description, createdAt, city, previewUrl, imagesUrls, isPremium, isFavorite, rating, type, roomCount, guestCount, rentPrice, conveniences, author, authorEmail, authorPassword, latitude, longitude] = splitString;
 
     return {
-      title,
+      name,
       description,
-      date: new Date(date),
-      city: city,
-      previewImage,
-      images: images.split(';'),
+      createdAt: new Date(createdAt),
+      city: city as CityType,
+      previewUrl,
+      imagesUrls: imagesUrls.split(';'),
       isPremium: Boolean(isPremium),
       isFavorite: Boolean(isFavorite),
       rating: Number(rating),
-      type: type as AccommodationType,
+      accommodationType: type as AccommodationType,
       roomCount: Number(roomCount),
       guestCount: Number(guestCount),
       rentPrice: Number(rentPrice),
       conveniences: conveniences
         .split(';')
         .map((convenience) => convenience as ConvenienceType),
-      authorUrl,
+      author: {
+        email: authorEmail,
+        name: author,
+        type: UserType.common,
+        avatarUrl: `http://8.8.8.8:232/${author}`,
+        password: authorPassword,
+      },
       latitude: Number(latitude),
       longitude: Number(longitude),
       commentCount: 0
@@ -39,10 +46,10 @@ export class OfferTsvParser {
 
   toString(offer: RentOffer): string {
     return [
-      offer.title, offer.description, offer.date, offer.city,
-      offer.previewImage, offer.images.join(';'), offer.isPremium, offer.isFavorite,
-      offer.rating, offer.type, offer.roomCount, offer.guestCount,
-      offer.rentPrice, offer.conveniences.join(';'), offer.authorUrl, offer.latitude, offer.longitude
+      offer.name, offer.description, offer.createdAt, offer.city,
+      offer.previewUrl, offer.imagesUrls.join(';'), offer.isPremium, offer.isFavorite,
+      offer.rating, offer.accommodationType, offer.roomCount, offer.guestCount,
+      offer.rentPrice, offer.conveniences.join(';'), offer.author.name, offer.author.email, offer.author.password, offer.latitude, offer.longitude
     ].join('\t');
   }
 }

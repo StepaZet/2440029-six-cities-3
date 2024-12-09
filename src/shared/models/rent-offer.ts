@@ -1,3 +1,5 @@
+import { User } from './user.js';
+
 export enum AccommodationType {
   apartment = 'Apartment',
   house = 'House',
@@ -15,23 +17,32 @@ export enum ConvenienceType {
   Fridge = 'Fridge'
 }
 
+export enum CityType {
+  Paris = 'Paris',
+  Cologne = 'Cologne',
+  Brussels = 'Brussels',
+  Amsterdam = 'Amsterdam',
+  Hamburg = 'Hamburg',
+  Dusseldorf = 'Dusseldorf'
+}
+
 export type RentOffer = {
-  title: string;
-  description: string;
-  date: Date;
-  city: string;
-  previewImage: string;
-  images: string[];
-  isPremium: boolean;
-  isFavorite: boolean;
-  rating: number;
-  type: AccommodationType;
-  roomCount: number;
-  guestCount: number;
-  rentPrice: number;
-  conveniences: ConvenienceType[];
-  authorUrl: string;
-  latitude: number;
-  longitude: number;
-  commentCount: number;
+  name: string,
+  description: string,
+  createdAt: Date,
+  city: CityType,
+  previewUrl: string,
+  imagesUrls: string[],
+  isPremium: boolean,
+  isFavorite: boolean,
+  rating: number,
+  accommodationType: AccommodationType,
+  roomCount: number,
+  guestCount: number,
+  rentPrice: number,
+  conveniences: ConvenienceType[],
+  author: User,
+  latitude: number,
+  longitude: number,
+  commentCount: number,
 }

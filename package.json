@@ -11,12 +11,11 @@
   "scripts": {
     "start": "npm run build && node ./dist/main.cli.js",
     "build": "npm run clean && npm run compile",
-    "lint": "eslint src/ --ext .ts",
+    "lint": "eslint src/ --ext .ts --fix",
     "compile": "tsc -p tsconfig.json",
     "clean": "rimraf dist",
     "ts": "ts-node",
-    "mock:server": "json-server ./mocks/mock-server-data.json --port 3123",
-    "start:dev": "npm run build && node ./dist/main.rest.js | pino-pretty --colorize --translateTime"
+    "mock:server": "json-server ./mocks/mock-server-data.json --port 3123"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.3.0",
@@ -40,13 +39,16 @@
     "npm": ">=8"
   },
   "dependencies": {
+    "@typegoose/typegoose": "^12.9.1",
     "chalk": "^5.3.0",
     "convict": "^6.2.4",
     "convict-format-with-validator": "^6.2.0",
     "dotenv": "^16.4.7",
     "got": "^14.4.5",
     "inversify": "^6.1.6",
+    "joi": "^17.13.3",
     "json-server": "^1.0.0-beta.3",
+    "mongoose": "^8.8.4",
     "pino-pretty": "^13.0.0"
   }
 }

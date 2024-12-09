@@ -1,3 +1,6 @@
+import { User, UserType } from '../models/user.js';
+import { faker } from '@faker-js/faker';
+
 export function getRandomNumber(min: number, max: number, numDigitsAfterPoint: number = 0): number {
   const randomValue = Math.random() * (max - min) + min;
   const fixedValueString = randomValue.toFixed(numDigitsAfterPoint);
@@ -32,4 +35,14 @@ export function getRandomEnumValues<T extends object>(enumObject: T): T[keyof T]
 
 export function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : '';
+}
+
+
+export function getRandomUser(): User {
+  return {
+    email: faker.internet.email(),
+    name: faker.person.fullName(),
+    password: faker.internet.password(),
+    type: getRandomEnumValue(UserType),
+  };
 }
