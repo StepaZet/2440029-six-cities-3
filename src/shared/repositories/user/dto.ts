@@ -11,6 +11,18 @@ export class CreateUserDto {
   ) {}
 }
 
+export class LoginDto {
+  constructor(
+  public email: string,
+  public password: string,
+  ) {}
+}
+
+export const loginDtoSchema = Joi.object({
+  email: Joi.string().required().email(),
+  password: Joi.string().required().min(6).max(12)
+});
+
 export const createUserDtoSchema = Joi.object({
   email: Joi.string().required().email(),
   avatarUrl: Joi.string().uri(),
