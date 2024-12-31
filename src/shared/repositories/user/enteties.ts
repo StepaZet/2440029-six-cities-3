@@ -1,6 +1,6 @@
 import { getModelForClass, prop, defaultClasses, modelOptions } from '@typegoose/typegoose';
-import { createHash } from 'node:crypto';
 import { User, UserType } from '../../models/user.js';
+import { generatePassword } from '../../helpers/password.js';
 
 @modelOptions({
   schemaOptions: {
@@ -33,8 +33,12 @@ export class UserEntity extends defaultClasses.TimeStamps {
     this.type = createSchema.type;
   }
 
-  public setPassword(password: string) {
-    this.password = createHash('sha256').update(password).digest('hex');
+  public setPassword(password: string, salt: string) {
+    this.password = generatePassword(password, salt);
+  }
+
+  public getPassword() {
+    return this.password;
   }
 }
 

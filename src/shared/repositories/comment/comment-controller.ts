@@ -12,22 +12,43 @@ import { CommentRepository } from './comment-repository.interface.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { CreateCommentDto, createCommentDtoSchema } from './dto.js';
 import { HttpError } from '../../libs/rest-exceptions/http-error.js';
+import { Config } from '../../libs/config/config.interface.js';
+import { AppSchema } from '../../libs/config/app.schema.js';
+import { AuthorizeMiddleware } from '../../libs/rest/authorize.middlewate.js';
 
 @injectable()
 export class CommentController extends ControllerBase {
   constructor(
     @inject(DIType.Logger) logger: Logger,
     @inject(DIType.CommentRepository) private commentService: CommentRepository,
+    @inject(DIType.Config) private readonly config: Config<AppSchema>
   ) {
     super(logger);
 
-    this.addRoute({path: '/:id/comments', httpMethod: HttpMethod.Get, handleAsync: this.index.bind(this), middlewares: [new ObjectIdValidatorMiddleware(this.commentService, 'id')]});
-    this.addRoute({path: '/:id/comments', httpMethod: HttpMethod.Post, handleAsync: this.create.bind(this), middlewares: [new SchemaValidatorMiddleware(createCommentDtoSchema), new ObjectIdValidatorMiddleware(this.commentService, 'id')]});
+    this.addRoute({
+      path: '/:id/comments',
+      httpMethod: HttpMethod.Get,
+      handleAsync: this.index.bind(this),
+      middlewares: [
+        new ObjectIdValidatorMiddleware(this.commentService, 'id')
+      ]
+    });
+    this.addRoute({
+      path: '/:id/comments',
+      httpMethod: HttpMethod.Post,
+      handleAsync: this.create.bind(this),
+      middlewares: [
+        new SchemaValidatorMiddleware(createCommentDtoSchema),
+        new ObjectIdValidatorMiddleware(this.commentService, 'id'),
+        new AuthorizeMiddleware(this.config.get('JWT_SECRET'))
+      ]
+    });
   }
 
   private async create(req: Request, res: Response): Promise<void> {
+    const { userId } = res.locals;
     const dto = plainToInstance(CreateCommentDto, req.body as object);
-    dto.authorId = new Types.ObjectId();
+    dto.authorId = userId;
     const offer = await this.commentService.create(dto);
     this.created(res, offer);
   }

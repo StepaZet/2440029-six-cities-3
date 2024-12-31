@@ -1,12 +1,13 @@
 import 'reflect-metadata';
 import { DocumentType, types } from '@typegoose/typegoose';
 import { inject, injectable } from 'inversify';
-import { Types } from 'mongoose';
+import { ObjectId, Types } from 'mongoose';
 import { DIType } from '../../libs/di/di.enum.js';
 import { UserRepository } from './user-repository.interface.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { UserEntity } from './enteties.js';
 import { CreateUserDto } from './dto.js';
+import { generatePassword } from '../../helpers/password.js';
 
 @injectable()
 export class DefaultUserRepository implements UserRepository {
@@ -20,9 +21,9 @@ export class DefaultUserRepository implements UserRepository {
     return Boolean(result);
   }
 
-  public async create(schema: CreateUserDto): Promise<DocumentType<UserEntity>> {
+  public async create(schema: CreateUserDto, salt: string): Promise<DocumentType<UserEntity>> {
     const user = new UserEntity(schema);
-    user.setPassword(schema.password);
+    user.setPassword(schema.password, salt);
 
     const result = this.userModel.create(user);
     this.logger.info(`New user created: ${user.email}`);
@@ -36,5 +37,26 @@ export class DefaultUserRepository implements UserRepository {
 
   public async findByEmail(email: string): Promise<DocumentType<UserEntity> | null> {
     return await this.userModel.findOne({ email }).exec();
+  }
+
+  public async checkPassword(email: string, password: string, salt: string): Promise<DocumentType<UserEntity> | null> {
+    const user = await this.findByEmail(email);
+
+    if (!user) {
+      return null;
+    }
+
+    const currentHash = generatePassword(password, salt);
+    const hashFromDb = user.getPassword();
+
+    if (currentHash !== hashFromDb) {
+      return null;
+    }
+
+    return user;
+  }
+
+  public async updateAvatar(id: ObjectId, avatarPath: string): Promise<void> {
+    await this.userModel.updateOne({ id: id }, { avatarUrl: avatarPath });
   }
 }

@@ -36,12 +36,12 @@ export class ImportCommand implements Command {
     return '--import';
   }
 
-  public async execute(filename: string, databaseConnectionUri: string): Promise<void> {
+  public async execute(filename: string, databaseConnectionUri: string, salt: string): Promise<void> {
 
     await this.dbClient.connect(databaseConnectionUri);
     const reader = new TsvFileReader(filename.trim());
 
-    reader.on('readline', this.onImportedLine);
+    reader.on('readline', (importedLine: string, resolve: () => void) => this.onImportedLine(salt, importedLine, resolve));
     reader.on('end', this.onCompleteImport);
 
     try {
@@ -52,9 +52,9 @@ export class ImportCommand implements Command {
     }
   }
 
-  private async onImportedLine(importedLine: string, resolve: () => void): Promise<void> {
+  private async onImportedLine(salt: string, importedLine: string, resolve: () => void): Promise<void> {
     const offer = this.parser.parse(importedLine);
-    await this.saveOffer(offer);
+    await this.saveOffer(offer, salt);
     resolve();
   }
 
@@ -63,11 +63,11 @@ export class ImportCommand implements Command {
     this.dbClient.disconnect();
   }
 
-  private async saveOffer(offer: RentOffer) {
+  private async saveOffer(offer: RentOffer, salt: string) {
     let user = await this.userRepository.findByEmail(offer.author.email);
 
     if (user === null) {
-      user = await this.userRepository.create(offer.author);
+      user = await this.userRepository.create(offer.author, salt);
     }
 
     await this.offerRepository.create({
