@@ -13,7 +13,7 @@ export class AuthorizeMiddleware implements Middleware {
     const authorizationHeader = req.headers.authorization;
 
     if (!authorizationHeader) {
-      throw new HttpError(StatusCodes.UNAUTHORIZED, 'Authorization token is empty');
+      throw new HttpError(StatusCodes.UNAUTHORIZED, 'Not found access token');
     }
 
     try {
@@ -23,7 +23,7 @@ export class AuthorizeMiddleware implements Middleware {
       const { userId } = result.payload;
       res.locals.userId = userId;
     } catch (err: unknown) {
-      throw new HttpError(StatusCodes.UNAUTHORIZED, 'Incorrect authorization token', String(err));
+      throw new HttpError(StatusCodes.UNAUTHORIZED, 'Bad access token', String(err));
     }
 
     next();

@@ -7,9 +7,7 @@ import { OfferTsvGenerator } from '../../shared/libs/offer/offer-tsv-generator.j
 
 export class GenerateCommand implements Command {
 
-  public getName(): string {
-    return '--generate';
-  }
+  public getName = (): string => '--generate';
 
   public async execute(...args: string[]): Promise<void> {
     const [count, path, url] = args;
@@ -20,8 +18,7 @@ export class GenerateCommand implements Command {
       await this.write(data, path, offerCount);
       console.info(`File ${path} was created.`);
     } catch (error: unknown) {
-      console.error('Can\'t generate data');
-      console.error(`Details: ${getErrorMessage(error)}`);
+      console.error(`Error while generating data. Details: ${getErrorMessage(error)}`);
     }
   }
 

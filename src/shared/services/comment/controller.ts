@@ -5,23 +5,27 @@ import { Request, Response } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { isValidObjectId, Types } from 'mongoose';
 import { StatusCodes } from 'http-status-codes';
-import { ObjectIdValidatorMiddleware } from '../../libs/rest/object-id-validator.middleware.js';
-import { SchemaValidatorMiddleware } from '../../libs/rest/schema-validator.middleware.js';
-import { DIType } from '../../libs/di/di.enum.js';
-import { CommentRepository } from './comment-repository.interface.js';
+import { ObjectExistingValidatorMiddleware } from '../../libs/rest-middlewares/object-id-validator.js';
+import { SchemaValidatorMiddleware } from '../../libs/rest-middlewares/schema-validator.js';
+import { DIName } from '../../libs/di/di.enum.js';
+import { CommentRepository } from './repository/comment-repository.interface.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { CreateCommentDto, createCommentDtoSchema } from './dto.js';
 import { HttpError } from '../../libs/rest-exceptions/http-error.js';
 import { Config } from '../../libs/config/config.interface.js';
 import { AppSchema } from '../../libs/config/app.schema.js';
-import { AuthorizeMiddleware } from '../../libs/rest/authorize.middlewate.js';
+import { AuthorizeMiddleware as AuthorizationMiddleware } from '../../libs/rest-middlewares/authorize.js';
+import { OfferRepository } from '../offer/repository/offer-repository.interface.js';
 
 @injectable()
 export class CommentController extends ControllerBase {
+  readonly prefix: string = '/offers';
+
   constructor(
-    @inject(DIType.Logger) logger: Logger,
-    @inject(DIType.CommentRepository) private commentService: CommentRepository,
-    @inject(DIType.Config) private readonly config: Config<AppSchema>
+    @inject(DIName.Logger) logger: Logger,
+    @inject(DIName.CommentRepository) private commentRepository: CommentRepository,
+    @inject(DIName.OfferRepository) private offerRepository: OfferRepository,
+    @inject(DIName.Config) private readonly config: Config<AppSchema>
   ) {
     super(logger);
 
@@ -30,7 +34,7 @@ export class CommentController extends ControllerBase {
       httpMethod: HttpMethod.Get,
       handleAsync: this.index.bind(this),
       middlewares: [
-        new ObjectIdValidatorMiddleware(this.commentService, 'id')
+        new ObjectExistingValidatorMiddleware(this.offerRepository, 'id')
       ]
     });
     this.addRoute({
@@ -38,50 +42,43 @@ export class CommentController extends ControllerBase {
       httpMethod: HttpMethod.Post,
       handleAsync: this.create.bind(this),
       middlewares: [
+        new AuthorizationMiddleware(this.config.get('JWT_SECRET')),
         new SchemaValidatorMiddleware(createCommentDtoSchema),
-        new ObjectIdValidatorMiddleware(this.commentService, 'id'),
-        new AuthorizeMiddleware(this.config.get('JWT_SECRET'))
+        new ObjectExistingValidatorMiddleware(this.offerRepository, 'id'),
       ]
     });
   }
 
   private async create(req: Request, res: Response): Promise<void> {
     const { userId } = res.locals;
+    const { id } = req.params;
+
     const dto = plainToInstance(CreateCommentDto, req.body as object);
+
     dto.authorId = userId;
-    const offer = await this.commentService.create(dto);
+    dto.offerId = new Types.ObjectId(id);
+
+    const offer = await this.commentRepository.create(dto);
+
     this.created(res, offer);
   }
 
   private async index(req: Request, res: Response): Promise<void> {
-    const { limit, skip } = req.query;
+    const { limit, offset } = req.query;
+    const { id } = req.params;
 
     const defaultLimit = 20;
     const limitValue = limit ? parseInt(limit as string, 10) : defaultLimit;
 
-    if (isNaN(limitValue)) {
-      this.sendBadRequest('limit', limit);
+    const defaultOffset = 0;
+    const offsetValue = offset ? parseInt(offset as string, 10) : defaultOffset;
+
+    if (!isValidObjectId(id)) {
+      throw new HttpError(StatusCodes.BAD_REQUEST, `id ${id} isn't valid ObjectId`);
     }
 
-    const defaultSkip = 0;
-    const skipValue = skip ? parseInt(skip as string, 10) : defaultSkip;
+    const result = await this.commentRepository.findByOffer(new Types.ObjectId(id), limitValue, offsetValue);
 
-    if (isNaN(skipValue)) {
-      this.sendBadRequest('skip', skip);
-    }
-
-    const { offerId } = req.params;
-
-    if (!isValidObjectId(offerId)) {
-      this.sendBadRequest('offerId', offerId);
-    }
-
-    const result = this.commentService.findAllForOffer(new Types.ObjectId(offerId), limitValue, skipValue);
     this.ok(res, result);
-  }
-
-  private sendBadRequest<T>(paramName: string, value: T): void {
-    const error = `Wrong value for ${paramName}: ${value}`;
-    throw new HttpError(StatusCodes.BAD_REQUEST, error);
   }
 }

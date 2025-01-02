@@ -5,14 +5,7 @@ export class OfferTsvParser {
   constructor() {}
 
   parse(rawString: string): RentOffer {
-    const trimString = rawString.trim();
-
-    if (!trimString) {
-      throw new Error('rawString should not be empty');
-    }
-
-    const splitString = trimString.split('\t');
-    const [name, description, createdAt, city, previewUrl, imagesUrls, isPremium, isFavorite, rating, type, roomCount, guestCount, rentPrice, conveniences, author, authorEmail, authorPassword, latitude, longitude] = splitString;
+    const [name, description, createdAt, city, previewUrl, imagesUrls, isPremium, isFavorite, rating, type, roomCount, guestCount, rentPrice, conveniences, author, authorEmail, authorPassword, latitude, longitude] = rawString.trim().split('\t');
 
     return {
       name,
@@ -34,8 +27,8 @@ export class OfferTsvParser {
       author: {
         email: authorEmail,
         name: author,
-        type: UserType.common,
-        avatarUrl: `http://8.8.8.8:232/${author}`,
+        type: UserType.Common,
+        avatarUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/01/Jones_and_Ellen_Ripley.webp/258px-Jones_and_Ellen_Ripley.webp.png',
         password: authorPassword,
       },
       latitude: Number(latitude),
