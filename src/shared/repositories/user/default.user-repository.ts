@@ -16,7 +16,7 @@ export class DefaultUserRepository implements UserRepository {
     @inject(DIName.UserModel) private readonly userModel: types.ModelType<UserEntity>
   ) {}
 
-  public async checkIdExists(id: Types.ObjectId): Promise<boolean> {
+  public async doesIdExist(id: Types.ObjectId): Promise<boolean> {
     const result = await this.userModel.findById(id);
     return Boolean(result);
   }

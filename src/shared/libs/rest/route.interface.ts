@@ -1,6 +1,6 @@
 import { HttpMethod } from './http-method.enum.js';
 import { NextFunction, Request, Response } from 'express';
-import { Middleware } from './middleware.interface.js';
+import { Middleware } from '../rest-middlewares/middleware.interface.js';
 
 export interface Route {
   path: string;

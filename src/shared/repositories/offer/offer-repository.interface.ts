@@ -3,9 +3,9 @@ import { OfferEntity } from './enteties.js';
 import { OfferDto, UpdateOfferDto } from './dto.js';
 import { Types } from 'mongoose';
 import { CityType } from '../../models/rent-offer.js';
-import { CheckIdService } from '../../libs/rest/check-id-service.interface.js';
+import { CheckIdRepository } from '../../libs/rest/check-id-repository.interface.js';
 
-export interface OfferRepository extends CheckIdService {
+export interface OfferRepository extends CheckIdRepository {
   create(dto: OfferDto): Promise<DocumentType<OfferEntity>>;
   change(id: Types.ObjectId, dto: UpdateOfferDto): Promise<DocumentType<OfferEntity> | null>;
   deleteById(id: Types.ObjectId): Promise<void>;

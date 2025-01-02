@@ -18,7 +18,7 @@ export class DefaultCommentRepository implements CommentRepository {
     @inject(DIName.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>
   ) {}
 
-  public async checkIdExists(id: Types.ObjectId): Promise<boolean> {
+  public async doesIdExist(id: Types.ObjectId): Promise<boolean> {
     const result = await this.commentModel.findById(id);
     return Boolean(result);
   }

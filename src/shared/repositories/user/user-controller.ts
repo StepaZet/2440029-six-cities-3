@@ -7,19 +7,21 @@ import { DIName } from '../../libs/di/di.enum.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { UserRepository } from './user-repository.interface.js';
 import { CreateUserDto, createUserDtoSchema, LoginDto, loginDtoSchema } from './dto.js';
-import { SchemaValidatorMiddleware } from '../../libs/rest/schema-validator.middleware.js';
-import { ObjectIdValidatorMiddleware } from '../../libs/rest/object-id-validator.middleware.js';
-import { UploadFileMiddleware } from '../../libs/rest/upload-file.middleware.js';
+import { SchemaValidatorMiddleware } from '../../libs/rest-middlewares/schema-validator.js';
+import { ObjectIdValidatorMiddleware } from '../../libs/rest-middlewares/object-id-validator.js';
+import { UploadFileMiddleware } from '../../libs/rest-middlewares/upload-file.js';
 import { Config } from '../../libs/config/config.interface.js';
 import { AppSchema } from '../../libs/config/app.schema.js';
 import { HttpError } from '../../libs/rest-exceptions/http-error.js';
 import { StatusCodes } from 'http-status-codes';
 import { getToken } from '../../helpers/jwt.js';
-import { AuthorizeMiddleware } from '../../libs/rest/authorize.middlewate.js';
+import { AuthorizeMiddleware } from '../../libs/rest-middlewares/authorize.js';
 
 
 @injectable()
 export class UserController extends ControllerBase {
+  readonly prefix: string = '/users';
+
   constructor(
     @inject(DIName.Logger) logger: Logger,
     @inject(DIName.UserRepository) private userRepository: UserRepository,

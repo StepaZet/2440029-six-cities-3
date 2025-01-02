@@ -17,6 +17,7 @@ export class LoggingExceptionFilter implements ExceptionFilter {
     if (err instanceof HttpError) {
       res.statusCode = err.httpStatusCode;
       res.send({error: err.message, detail: err.detail});
+      return;
     }
 
     this.logger.error(err.message, err);

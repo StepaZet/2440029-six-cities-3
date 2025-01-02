@@ -13,7 +13,7 @@ export class AuthorizeMiddleware implements Middleware {
     const authorizationHeader = req.headers.authorization;
 
     if (!authorizationHeader) {
-      throw new HttpError(StatusCodes.UNAUTHORIZED, 'Not found Authorization token');
+      throw new HttpError(StatusCodes.UNAUTHORIZED, 'Not found access token');
     }
 
     try {

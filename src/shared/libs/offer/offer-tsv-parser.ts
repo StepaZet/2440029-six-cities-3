@@ -27,7 +27,7 @@ export class OfferTsvParser {
       author: {
         email: authorEmail,
         name: author,
-        type: UserType.common,
+        type: UserType.Common,
         avatarUrl: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/01/Jones_and_Ellen_Ripley.webp/258px-Jones_and_Ellen_Ripley.webp.png',
         password: authorPassword,
       },

@@ -32,9 +32,9 @@ export class App {
 
     this.configureMiddlewares(app);
 
-    app.use('/users', this.userController.router);
-    app.use('/offers', this.offerController.router);
-    app.use('/offers', this.commentController.router);
+    app.use(this.userController.prefix, this.userController.router);
+    app.use(this.offerController.prefix, this.offerController.router);
+    app.use(this.commentController.prefix, this.commentController.router);
 
     app.use(this.exceptionFilter.handle.bind(this.exceptionFilter));
 

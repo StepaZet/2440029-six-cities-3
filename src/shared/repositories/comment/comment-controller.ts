@@ -5,8 +5,8 @@ import { Request, Response } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { isValidObjectId, Types } from 'mongoose';
 import { StatusCodes } from 'http-status-codes';
-import { ObjectIdValidatorMiddleware } from '../../libs/rest/object-id-validator.middleware.js';
-import { SchemaValidatorMiddleware } from '../../libs/rest/schema-validator.middleware.js';
+import { ObjectIdValidatorMiddleware } from '../../libs/rest-middlewares/object-id-validator.js';
+import { SchemaValidatorMiddleware } from '../../libs/rest-middlewares/schema-validator.js';
 import { DIName } from '../../libs/di/di.enum.js';
 import { CommentRepository } from './comment-repository.interface.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
@@ -14,11 +14,13 @@ import { CreateCommentDto, createCommentDtoSchema } from './dto.js';
 import { HttpError } from '../../libs/rest-exceptions/http-error.js';
 import { Config } from '../../libs/config/config.interface.js';
 import { AppSchema } from '../../libs/config/app.schema.js';
-import { AuthorizeMiddleware } from '../../libs/rest/authorize.middlewate.js';
+import { AuthorizeMiddleware } from '../../libs/rest-middlewares/authorize.js';
 import { OfferRepository } from '../offer/offer-repository.interface.js';
 
 @injectable()
 export class CommentController extends ControllerBase {
+  readonly prefix: string = '/offers';
+
   constructor(
     @inject(DIName.Logger) logger: Logger,
     @inject(DIName.CommentRepository) private commentRepository: CommentRepository,

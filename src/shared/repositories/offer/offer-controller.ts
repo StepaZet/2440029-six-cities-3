@@ -11,14 +11,16 @@ import { Logger } from '../../libs/logging/logger.interface.js';
 import { CityType } from '../../models/rent-offer.js';
 import { HttpError } from '../../libs/rest-exceptions/http-error.js';
 import { OfferDto, updateOfferDtoSchema } from './dto.js';
-import { SchemaValidatorMiddleware } from '../../libs/rest/schema-validator.middleware.js';
-import { ObjectIdValidatorMiddleware } from '../../libs/rest/object-id-validator.middleware.js';
 import { AppSchema } from '../../libs/config/app.schema.js';
 import { Config } from '../../libs/config/config.interface.js';
-import { AuthorizeMiddleware } from '../../libs/rest/authorize.middlewate.js';
+import { AuthorizeMiddleware } from '../../libs/rest-middlewares/authorize.js';
+import { ObjectIdValidatorMiddleware } from '../../libs/rest-middlewares/object-id-validator.js';
+import { SchemaValidatorMiddleware } from '../../libs/rest-middlewares/schema-validator.js';
 
 @injectable()
 export class OfferController extends ControllerBase {
+  readonly prefix: string = '/offers';
+
   constructor(
     @inject(DIName.Logger) logger: Logger,
     @inject(DIName.OfferRepository) private offerRepository: OfferRepository,
@@ -179,7 +181,7 @@ export class OfferController extends ControllerBase {
 
     await this.offerRepository.deleteById(offerId);
 
-    this.noContent(res);
+    this.ok(res, `Offer ${id} was successfully deleted`);
   }
 
   private async indexPremiumForCity(req: Request, res: Response): Promise<void> {

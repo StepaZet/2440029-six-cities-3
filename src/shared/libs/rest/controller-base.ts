@@ -10,6 +10,7 @@ import { Logger } from '../logging/logger.interface.js';
 @injectable()
 export abstract class ControllerBase implements Controller {
   public readonly router: Router;
+  readonly prefix!: string;
 
   constructor(
     protected logger: Logger
@@ -46,7 +47,7 @@ export abstract class ControllerBase implements Controller {
       }
     }
 
-    this.logger.info(`Registered route: ${route.httpMethod} ${route.path}`);
+    this.logger.info(`Added route: ${route.httpMethod} ${this.prefix}${route.path}`);
   }
 
 
@@ -61,9 +62,5 @@ export abstract class ControllerBase implements Controller {
 
   public created<T>(res: Response, data: T): void {
     this.send(res, StatusCodes.CREATED, data);
-  }
-
-  public noContent(res: Response): void {
-    this.send(res, StatusCodes.NO_CONTENT, null);
   }
 }
