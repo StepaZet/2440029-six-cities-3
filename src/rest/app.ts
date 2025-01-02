@@ -7,8 +7,8 @@ import { DBClient } from '../shared/libs/db/db-client.interface.js';
 import { Controller } from '../shared/libs/rest/controller.interface.js';
 import { ExceptionFilter } from '../shared/libs/rest-exceptions/exception-filter.interface.js';
 import express from 'express';
+import cors from 'cors';
 import { getMongoUri } from '../shared/helpers/db.js';
-import { CorsMiddleware } from '../shared/libs/rest-middlewares/cors.js';
 import { LoggingMiddleware } from '../shared/libs/rest-middlewares/logging.js';
 
 
@@ -58,12 +58,11 @@ export class App {
   }
 
   private async configureMiddlewares(app: express.Application) {
-    const corsMiddleware = new CorsMiddleware();
     const loggingMiddleware = new LoggingMiddleware(this.logger);
 
     app.use(express.json());
     app.use(express.static(this.config.get('STATIC_ROOT')));
-    app.use(corsMiddleware.handleAsync.bind(corsMiddleware));
+    app.use(cors());
     app.use(loggingMiddleware.handleAsync.bind(loggingMiddleware));
   }
 }
