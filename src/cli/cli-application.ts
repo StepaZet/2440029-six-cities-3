@@ -9,23 +9,25 @@ export class CLIApplication {
   ) { }
 
   private commands: CommandCollection = {};
+
   public registerCommands(commandList: Command[]): void {
     commandList.forEach((command) => {
       if (Object.hasOwn(this.commands, command.getName())) {
-        throw new Error(`Command ${command.getName()} is already exist`);
+        throw new Error(`Command ${command.getName()} already exists`);
       }
       this.commands[command.getName()] = command;
     });
   }
 
-  public getCommand = (commandName: string): Command =>
-    this.commands[commandName] ?? this.getDefaultCommand();
-
+  public getCommand(commandName: string): Command {
+    return this.commands[commandName] ?? this.getDefaultCommand();
+  }
 
   public getDefaultCommand(): Command | never {
     if (!this.commands[this.defaultCommand]) {
-      throw new Error(`The default command ${this.defaultCommand} is not register`);
+      throw new Error(`The default command ${this.defaultCommand} wasn't registered`);
     }
+
     return this.commands[this.defaultCommand];
   }
 
