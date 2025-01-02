@@ -10,7 +10,7 @@ import { OfferRepository } from './offer-repository.interface.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { CityType } from '../../models/rent-offer.js';
 import { HttpError } from '../../libs/rest-exceptions/http-error.js';
-import { createOfferDtoSchema, OfferDto, updateOfferDtoSchema } from './dto.js';
+import { OfferDto, updateOfferDtoSchema } from './dto.js';
 import { SchemaValidatorMiddleware } from '../../libs/rest/schema-validator.middleware.js';
 import { ObjectIdValidatorMiddleware } from '../../libs/rest/object-id-validator.middleware.js';
 import { AppSchema } from '../../libs/config/app.schema.js';
@@ -68,7 +68,7 @@ export class OfferController extends ControllerBase {
       httpMethod: HttpMethod.Post,
       handleAsync: this.create.bind(this),
       middlewares: [
-        new SchemaValidatorMiddleware(createOfferDtoSchema),
+        new SchemaValidatorMiddleware(updateOfferDtoSchema),
         new AuthorizeMiddleware(this.config.get('JWT_SECRET'))
       ]
     });
@@ -152,8 +152,9 @@ export class OfferController extends ControllerBase {
     const offerId = new Types.ObjectId(id);
 
     const offerFromDb = await this.offerRepository.findById(offerId);
+
     if (offerFromDb?.authorId !== userId) {
-      throw new HttpError(StatusCodes.FORBIDDEN, 'No access to delete offer');
+      throw new HttpError(StatusCodes.FORBIDDEN, 'No access to update offer');
     }
 
     const dto = plainToInstance(OfferDto, req.body);

@@ -40,11 +40,3 @@ export const updateOfferDtoSchema = Joi.object({
   longitude: Joi.number().min(-180).max(180).required()
 });
 
-export const createOfferDtoSchema = Joi.object({
-  ...updateOfferDtoSchema.keys,
-  authorId: Joi.string().custom((value, helpers) => {
-    const filtered = Types.ObjectId.isValid(value);
-    return !filtered ? helpers.error('any.invalid') : value;
-  }, 'invalid objectId'),
-
-});

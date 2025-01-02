@@ -15,12 +15,14 @@ import { HttpError } from '../../libs/rest-exceptions/http-error.js';
 import { Config } from '../../libs/config/config.interface.js';
 import { AppSchema } from '../../libs/config/app.schema.js';
 import { AuthorizeMiddleware } from '../../libs/rest/authorize.middlewate.js';
+import { OfferRepository } from '../offer/offer-repository.interface.js';
 
 @injectable()
 export class CommentController extends ControllerBase {
   constructor(
     @inject(DIType.Logger) logger: Logger,
-    @inject(DIType.CommentRepository) private commentService: CommentRepository,
+    @inject(DIType.CommentRepository) private commentRepository: CommentRepository,
+    @inject(DIType.OfferRepository) private offerRepository: OfferRepository,
     @inject(DIType.Config) private readonly config: Config<AppSchema>
   ) {
     super(logger);
@@ -30,7 +32,7 @@ export class CommentController extends ControllerBase {
       httpMethod: HttpMethod.Get,
       handleAsync: this.index.bind(this),
       middlewares: [
-        new ObjectIdValidatorMiddleware(this.commentService, 'id')
+        new ObjectIdValidatorMiddleware(this.offerRepository, 'id')
       ]
     });
     this.addRoute({
@@ -39,7 +41,7 @@ export class CommentController extends ControllerBase {
       handleAsync: this.create.bind(this),
       middlewares: [
         new SchemaValidatorMiddleware(createCommentDtoSchema),
-        new ObjectIdValidatorMiddleware(this.commentService, 'id'),
+        new ObjectIdValidatorMiddleware(this.offerRepository, 'id'),
         new AuthorizeMiddleware(this.config.get('JWT_SECRET'))
       ]
     });
@@ -47,9 +49,12 @@ export class CommentController extends ControllerBase {
 
   private async create(req: Request, res: Response): Promise<void> {
     const { userId } = res.locals;
+    const { id } = req.params;
+
     const dto = plainToInstance(CreateCommentDto, req.body as object);
     dto.authorId = userId;
-    const offer = await this.commentService.create(dto);
+    dto.offerId = new Types.ObjectId(id);
+    const offer = await this.commentRepository.create(dto);
     this.created(res, offer);
   }
 
@@ -70,13 +75,14 @@ export class CommentController extends ControllerBase {
       this.sendBadRequest('skip', skip);
     }
 
-    const { offerId } = req.params;
+    const { id } = req.params;
 
-    if (!isValidObjectId(offerId)) {
-      this.sendBadRequest('offerId', offerId);
+    if (!isValidObjectId(id)) {
+      this.sendBadRequest('offerId', id);
     }
 
-    const result = this.commentService.findAllForOffer(new Types.ObjectId(offerId), limitValue, skipValue);
+    const result = await this.commentRepository.findAllForOffer(new Types.ObjectId(id), limitValue, skipValue);
+
     this.ok(res, result);
   }
 

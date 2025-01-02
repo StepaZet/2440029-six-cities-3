@@ -56,10 +56,10 @@ export class DefaultOfferRepository implements OfferRepository {
   }
 
   public async addToFavourite(orderId: Types.ObjectId, userId: Types.ObjectId): Promise<void> {
-    await this.offerModel.findByIdAndUpdate(orderId, {'$push': {favouriteUsers: userId}}).exec();
+    await this.offerModel.findByIdAndUpdate(orderId, {'$addToSet': {favouriteUsers: userId}}).exec();
   }
 
   public async removeFromFavourite(orderId: Types.ObjectId, userId: Types.ObjectId): Promise<void> {
-    await this.offerModel.findByIdAndUpdate(orderId, {'$pop': {favouriteUsers: userId}}).exec();
+    await this.offerModel.findByIdAndUpdate(orderId, {'$pull': {favouriteUsers: userId}}).exec();
   }
 }

@@ -26,8 +26,8 @@ export class DefaultCommentRepository implements CommentRepository {
   public async create(dto: CreateCommentDto): Promise<DocumentType<CommentEntity>> {
     const result = await this.commentModel.create(dto);
 
-    const aggregation = await this.commentModel.aggregate([{'$match': {offerId: dto.offerId}}, {'$group': {_id: null, count: {'$sum': 1}, average: {'$avg': '$rating'}}}]).exec();
-    this.offerModel.findByIdAndUpdate(dto.offerId, {commentsNumber: aggregation[0].count, rating: aggregation[0].average});
+    const aggregation = await this.commentModel.aggregate([{'$match': {offerId: String(dto.offerId)}}, {'$group': {_id: null, count: {'$sum': 1}, average: {'$avg': '$rating'}}}]).exec();
+    await this.offerModel.findByIdAndUpdate(dto.offerId, {commentCount: aggregation[0].count, rating: aggregation[0].average}).exec();
 
     this.logger.info(`New comment created: ${result._id}`);
 
@@ -35,6 +35,6 @@ export class DefaultCommentRepository implements CommentRepository {
   }
 
   public async findAllForOffer(offerId: Types.ObjectId, limit: number, skip: number): Promise<DocumentType<CommentEntity>[]> {
-    return await this.commentModel.find({offerId: offerId}).skip(skip).limit(limit).exec();
+    return await this.commentModel.find({offerId: {$eq: offerId}}).populate('authorId').skip(skip).limit(limit).exec();
   }
 }
