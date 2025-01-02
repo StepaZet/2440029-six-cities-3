@@ -5,24 +5,26 @@ import { Request, Response } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { isValidObjectId, Types } from 'mongoose';
 import { StatusCodes } from 'http-status-codes';
-import { DIType } from '../../libs/di/di.enum.js';
-import { OfferRepository } from './offer-repository.interface.js';
+import { DIName } from '../../libs/di/di.enum.js';
+import { OfferRepository } from './repository/offer-repository.interface.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { CityType } from '../../models/rent-offer.js';
 import { HttpError } from '../../libs/rest-exceptions/http-error.js';
-import { createOfferDtoSchema, OfferDto, updateOfferDtoSchema } from './dto.js';
-import { SchemaValidatorMiddleware } from '../../libs/rest/schema-validator.middleware.js';
-import { ObjectIdValidatorMiddleware } from '../../libs/rest/object-id-validator.middleware.js';
+import { OfferDto, createOrUpdateOfferDtoSchema } from './dto.js';
 import { AppSchema } from '../../libs/config/app.schema.js';
 import { Config } from '../../libs/config/config.interface.js';
-import { AuthorizeMiddleware } from '../../libs/rest/authorize.middlewate.js';
+import { AuthorizeMiddleware } from '../../libs/rest-middlewares/authorize.js';
+import { ObjectExistingValidatorMiddleware } from '../../libs/rest-middlewares/object-id-validator.js';
+import { SchemaValidatorMiddleware } from '../../libs/rest-middlewares/schema-validator.js';
 
 @injectable()
 export class OfferController extends ControllerBase {
+  readonly prefix: string = '/offers';
+
   constructor(
-    @inject(DIType.Logger) logger: Logger,
-    @inject(DIType.OfferRepository) private offerRepository: OfferRepository,
-    @inject(DIType.Config) private readonly config: Config<AppSchema>
+    @inject(DIName.Logger) logger: Logger,
+    @inject(DIName.OfferRepository) private offerRepository: OfferRepository,
+    @inject(DIName.Config) private readonly config: Config<AppSchema>
   ) {
     super(logger);
     this.addRoute({
@@ -44,7 +46,7 @@ export class OfferController extends ControllerBase {
       httpMethod: HttpMethod.Post,
       handleAsync: this.addToFavourite.bind(this),
       middlewares: [
-        new ObjectIdValidatorMiddleware(this.offerRepository, 'id'),
+        new ObjectExistingValidatorMiddleware(this.offerRepository, 'id'),
         new AuthorizeMiddleware(this.config.get('JWT_SECRET'))
       ]
     });
@@ -53,7 +55,7 @@ export class OfferController extends ControllerBase {
       httpMethod: HttpMethod.Delete,
       handleAsync: this.removeFromFavourite.bind(this),
       middlewares: [
-        new ObjectIdValidatorMiddleware(this.offerRepository, 'id'),
+        new ObjectExistingValidatorMiddleware(this.offerRepository, 'id'),
         new AuthorizeMiddleware(this.config.get('JWT_SECRET'))
       ]
     });
@@ -68,7 +70,7 @@ export class OfferController extends ControllerBase {
       httpMethod: HttpMethod.Post,
       handleAsync: this.create.bind(this),
       middlewares: [
-        new SchemaValidatorMiddleware(createOfferDtoSchema),
+        new SchemaValidatorMiddleware(createOrUpdateOfferDtoSchema),
         new AuthorizeMiddleware(this.config.get('JWT_SECRET'))
       ]
     });
@@ -77,7 +79,7 @@ export class OfferController extends ControllerBase {
       httpMethod: HttpMethod.Get,
       handleAsync: this.showById.bind(this),
       middlewares: [
-        new ObjectIdValidatorMiddleware(this.offerRepository, 'id')
+        new ObjectExistingValidatorMiddleware(this.offerRepository, 'id')
       ]
     });
     this.addRoute({
@@ -85,8 +87,8 @@ export class OfferController extends ControllerBase {
       httpMethod: HttpMethod.Put,
       handleAsync: this.updateById.bind(this),
       middlewares: [
-        new SchemaValidatorMiddleware(updateOfferDtoSchema),
-        new ObjectIdValidatorMiddleware(this.offerRepository, 'id'),
+        new SchemaValidatorMiddleware(createOrUpdateOfferDtoSchema),
+        new ObjectExistingValidatorMiddleware(this.offerRepository, 'id'),
         new AuthorizeMiddleware(this.config.get('JWT_SECRET'))
       ]
     });
@@ -95,7 +97,7 @@ export class OfferController extends ControllerBase {
       httpMethod: HttpMethod.Delete,
       handleAsync: this.deleteById.bind(this),
       middlewares: [
-        new ObjectIdValidatorMiddleware(this.offerRepository, 'id'),
+        new ObjectExistingValidatorMiddleware(this.offerRepository, 'id'),
         new AuthorizeMiddleware(this.config.get('JWT_SECRET'))
       ]
     });
@@ -152,12 +154,13 @@ export class OfferController extends ControllerBase {
     const offerId = new Types.ObjectId(id);
 
     const offerFromDb = await this.offerRepository.findById(offerId);
+
     if (offerFromDb?.authorId !== userId) {
-      throw new HttpError(StatusCodes.FORBIDDEN, 'No access to delete offer');
+      throw new HttpError(StatusCodes.FORBIDDEN, 'No access to update offer');
     }
 
     const dto = plainToInstance(OfferDto, req.body);
-    const offer = await this.offerRepository.change(new Types.ObjectId(id), dto);
+    const offer = await this.offerRepository.updateById(new Types.ObjectId(id), dto);
     this.ok(res, offer);
   }
 
@@ -178,7 +181,7 @@ export class OfferController extends ControllerBase {
 
     await this.offerRepository.deleteById(offerId);
 
-    this.noContent(res);
+    this.ok(res, `Offer ${id} was successfully deleted`);
   }
 
   private async indexPremiumForCity(req: Request, res: Response): Promise<void> {
@@ -189,7 +192,7 @@ export class OfferController extends ControllerBase {
       this.sendBadRequest('city', city);
     }
 
-    const { limit, skip } = req.query;
+    const { limit, skip: offset } = req.query;
 
     const defaultLimit = 20;
     const limitValue = limit ? parseInt(limit as string, 10) : defaultLimit;
@@ -198,14 +201,14 @@ export class OfferController extends ControllerBase {
       this.sendBadRequest('limit', limit);
     }
 
-    const defaultSkip = 0;
-    const skipValue = skip ? parseInt(skip as string, 10) : defaultSkip;
+    const defaultOffset = 0;
+    const offsetValue = offset ? parseInt(offset as string, 10) : defaultOffset;
 
-    if (isNaN(skipValue)) {
-      this.sendBadRequest('skip', skip);
+    if (isNaN(offsetValue)) {
+      this.sendBadRequest('skip', offset);
     }
 
-    const offers = await this.offerRepository.findAllPremium(cityValue, limitValue, skipValue);
+    const offers = await this.offerRepository.findAllPremium(cityValue, limitValue, offsetValue);
     this.ok(res, offers);
   }
 

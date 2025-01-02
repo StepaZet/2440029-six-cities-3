@@ -17,25 +17,25 @@ export type AppSchema = {
 
 export const configAppSchema = convict<AppSchema>({
   PORT: {
-    doc: 'Port',
+    doc: 'Порт, на котором будет работать API',
     format: 'port',
     env: 'PORT',
-    default: 4000
+    default: 8000
   },
   DATABASE_HOST: {
-    doc: 'Database connection uri',
+    doc: 'Database host',
     format: 'url',
     env: 'DATABASE_HOST',
     default: null
   },
   DATABASE_PORT: {
-    doc: 'Database connection port',
+    doc: 'Database port',
     format: 'port',
     env: 'DATABASE_PORT',
     default: '27017'
   },
   DATABASE_USER: {
-    doc: 'Database user name',
+    doc: 'Database username',
     format: String,
     env: 'DATABASE_USER',
     default: null
@@ -53,19 +53,19 @@ export const configAppSchema = convict<AppSchema>({
     default: 'six-cities'
   },
   STATIC_ROOT: {
-    doc: 'Root path for static files',
+    doc: 'Корень для static files',
     format: String,
     env: 'STATIC_ROOT',
     default: null
   },
   SALT: {
-    doc: 'Salt',
+    doc: 'salt для надежности хранения паролей',
     format: String,
     env: 'SALT',
     default: null
   },
   JWT_SECRET: {
-    doc: 'Secret for sign jwt',
+    doc: 'Секрет для подписания токенов',
     format: String,
     env: 'JWT_SECRET',
     default: null

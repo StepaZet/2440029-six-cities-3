@@ -6,49 +6,48 @@ import { ConsoleLogger } from '../../shared/libs/logging/console.logger.js';
 import { Logger } from '../../shared/libs/logging/logger.interface.js';
 import { OfferTsvParser } from '../../shared/libs/offer/offer-tsv-parser.js';
 import { RentOffer } from '../../shared/models/rent-offer.js';
-import { DefaultOfferRepository } from '../../shared/repositories/offer/default.offer-repository.js';
-import { OfferModel } from '../../shared/repositories/offer/enteties.js';
-import { OfferRepository } from '../../shared/repositories/offer/offer-repository.interface.js';
-import { DefaultUserRepository } from '../../shared/repositories/user/default.user-repository.js';
-import { UserModel } from '../../shared/repositories/user/enteties.js';
-import { UserRepository } from '../../shared/repositories/user/user-repository.interface.js';
+import { DefaultOfferRepository } from '../../shared/services/offer/repository/offer-repository.default.js';
+import { OfferModel } from '../../shared/services/offer/enteties.js';
+import { OfferRepository } from '../../shared/services/offer/repository/offer-repository.interface.js';
+import { DefaultUserRepository } from '../../shared/services/user/repository/user-repository.default.js';
+import { UserModel } from '../../shared/services/user/enteties.js';
+import { UserRepository } from '../../shared/services/user/repository/user-repository.interface.js';
 import { Command } from './command.interface.js';
 
 
 export class ImportCommand implements Command {
-  private readonly parser: OfferTsvParser = new OfferTsvParser();
   private readonly userRepository: UserRepository;
   private readonly offerRepository: OfferRepository;
   private readonly dbClient: DBClient;
   private readonly logger: Logger;
+  private readonly parser: OfferTsvParser = new OfferTsvParser();
 
   constructor() {
     this.onImportedLine = this.onImportedLine.bind(this);
     this.onCompleteImport = this.onCompleteImport.bind(this);
-
     this.logger = new ConsoleLogger();
     this.offerRepository = new DefaultOfferRepository(this.logger, OfferModel);
     this.userRepository = new DefaultUserRepository(this.logger, UserModel);
     this.dbClient = new MongoDatabaseClient(this.logger);
   }
 
-  public getName(): string {
-    return '--import';
-  }
+  public getName = (): string => '--import';
 
   public async execute(filename: string, databaseConnectionUri: string, salt: string): Promise<void> {
 
     await this.dbClient.connect(databaseConnectionUri);
     const reader = new TsvFileReader(filename.trim());
 
-    reader.on('readline', (importedLine: string, resolve: () => void) => this.onImportedLine(salt, importedLine, resolve));
+    reader.on(
+      'readline',
+      (importedLine: string, resolve: () => void) => this.onImportedLine(salt, importedLine, resolve)
+    );
     reader.on('end', this.onCompleteImport);
 
     try {
       await reader.read();
     } catch (error: unknown) {
-      console.error(`Can't import data from file: ${filename}`);
-      console.error(`Details: ${getErrorMessage(error)}`);
+      console.error(`Error while importing data from ${filename}: ${getErrorMessage(error)}`);
     }
   }
 
@@ -71,21 +70,8 @@ export class ImportCommand implements Command {
     }
 
     await this.offerRepository.create({
-      name: offer.name,
-      description: offer.description,
-      createdAt: offer.createdAt,
-      city: offer.city,
-      previewUrl: offer.previewUrl,
-      imagesUrls: offer.imagesUrls,
-      isPremium: offer.isPremium,
-      accommodationType: offer.accommodationType,
-      roomCount: offer.roomCount,
-      guestCount: offer.guestCount,
-      rentPrice: offer.rentPrice,
-      conveniences: offer.conveniences,
+      ...offer,
       authorId: user.id,
-      latitude: offer.latitude,
-      longitude: offer.longitude,
     });
   }
 }

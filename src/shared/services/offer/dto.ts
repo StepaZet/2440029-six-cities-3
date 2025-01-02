@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { Types } from 'mongoose';
 import { AccommodationType, CityType, ConvenienceType } from '../../models/rent-offer.js';
 
-export class UpdateOfferDto {
+export class CreateOrUpdateOfferDto {
   public name!: string;
   public description!: string;
   public city!: CityType;
@@ -19,11 +19,11 @@ export class UpdateOfferDto {
   public longitude!: number;
 }
 
-export class OfferDto extends UpdateOfferDto {
+export class OfferDto extends CreateOrUpdateOfferDto {
   public authorId!: Types.ObjectId;
 }
 
-export const updateOfferDtoSchema = Joi.object({
+export const createOrUpdateOfferDtoSchema = Joi.object({
   name: Joi.string().min(10).max(100).required(),
   description: Joi.string().min(20).max(1024).required(),
   createdAt: Joi.date().required(),
@@ -38,13 +38,4 @@ export const updateOfferDtoSchema = Joi.object({
   conveniences: Joi.array().items(Joi.string().valid(...Object.values(ConvenienceType))).required(),
   latitude: Joi.number().min(-90).max(90).required(),
   longitude: Joi.number().min(-180).max(180).required()
-});
-
-export const createOfferDtoSchema = Joi.object({
-  ...updateOfferDtoSchema.keys,
-  authorId: Joi.string().custom((value, helpers) => {
-    const filtered = Types.ObjectId.isValid(value);
-    return !filtered ? helpers.error('any.invalid') : value;
-  }, 'invalid objectId'),
-
 });

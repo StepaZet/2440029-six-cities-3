@@ -28,9 +28,6 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ required: true })
   public isPremium!: boolean;
 
-  @prop({ required: true })
-  public isFavorite!: boolean;
-
   @prop({ required: true, default: 0 })
   public rating!: number;
 
@@ -49,7 +46,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ required: true, type: () => [String] })
   public conveniences!: ConvenienceType[];
 
-  @prop({ required: true })
+  @prop({ required: true, type: () => String })
   public authorId!: Ref<UserEntity>;
 
   @prop({ required: true })
@@ -61,7 +58,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ required: true, default: 0 })
   public commentCount!: number;
 
-  @prop({ required: true })
+  @prop({ required: true, type: () => [String] })
   public favouriteUsers: Ref<UserEntity>[] = [];
 }
 

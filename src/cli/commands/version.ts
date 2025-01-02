@@ -13,7 +13,7 @@ export class VersionCommand implements Command {
     const importedContent = JSON.parse(jsonContent);
 
     if (!Object.hasOwn(importedContent, 'version')) {
-      throw new Error('package.json has not "version" value');
+      throw new Error(`Not found version in ${this.filePath}`);
     }
 
     return importedContent.version;

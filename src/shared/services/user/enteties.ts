@@ -19,7 +19,7 @@ export class UserEntity extends defaultClasses.TimeStamps {
   public password?: string;
 
   @prop({ required: true })
-  public type: UserType = UserType.common;
+  public type: UserType = UserType.Common;
 
   @prop({ required: false, default: null })
   public avatarUrl?: string;

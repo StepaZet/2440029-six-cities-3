@@ -1,6 +1,6 @@
 import * as Mongoose from 'mongoose';
 import { inject, injectable } from 'inversify';
-import { DIType } from '../di/di.enum.js';
+import { DIName } from '../di/di.enum.js';
 import { DBClient } from './db-client.interface.js';
 import { Logger } from '../logging/logger.interface.js';
 
@@ -9,7 +9,7 @@ export class MongoDatabaseClient implements DBClient {
   private mongoose: typeof Mongoose | undefined;
 
   constructor(
-    @inject(DIType.Logger) private readonly logger: Logger
+    @inject(DIName.Logger) private readonly logger: Logger
   ) {}
 
   public async connect(uri: string): Promise<void> {

@@ -4,7 +4,7 @@ import { getModelForClass, prop, defaultClasses, modelOptions } from '@typegoose
 
 @modelOptions({
   schemaOptions: {
-    collection: 'users',
+    collection: 'comments',
     timestamps: true
   }
 })

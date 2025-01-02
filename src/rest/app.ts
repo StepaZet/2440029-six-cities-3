@@ -1,5 +1,5 @@
 import { injectable, inject } from 'inversify';
-import { DIType } from '../shared/libs/di/di.enum.js';
+import { DIName } from '../shared/libs/di/di.enum.js';
 import { Logger } from '../shared/libs/logging/logger.interface.js';
 import { Config } from '../shared/libs/config/config.interface.js';
 import { AppSchema } from '../shared/libs/config/app.schema.js';
@@ -7,36 +7,36 @@ import { DBClient } from '../shared/libs/db/db-client.interface.js';
 import { Controller } from '../shared/libs/rest/controller.interface.js';
 import { ExceptionFilter } from '../shared/libs/rest-exceptions/exception-filter.interface.js';
 import express from 'express';
+import cors from 'cors';
 import { getMongoUri } from '../shared/helpers/db.js';
+import { LoggingMiddleware } from '../shared/libs/rest-middlewares/logging.js';
 
 
 @injectable()
 export class App {
   constructor(
-    @inject(DIType.Logger) private readonly logger: Logger,
-    @inject(DIType.Config) private readonly config: Config<AppSchema>,
-    @inject(DIType.DBClient) private readonly databaseClient: DBClient,
-    @inject(DIType.UserController) private readonly userController: Controller,
-    @inject(DIType.OfferController) private readonly offerController: Controller,
-    @inject(DIType.CommentController) private readonly commentController: Controller,
-    @inject(DIType.ExceptionFilter) private readonly exceptionFilter: ExceptionFilter
+    @inject(DIName.Logger) private readonly logger: Logger,
+    @inject(DIName.Config) private readonly config: Config<AppSchema>,
+    @inject(DIName.DBClient) private readonly databaseClient: DBClient,
+    @inject(DIName.UserController) private readonly userController: Controller,
+    @inject(DIName.OfferController) private readonly offerController: Controller,
+    @inject(DIName.CommentController) private readonly commentController: Controller,
+    @inject(DIName.ExceptionFilter) private readonly exceptionFilter: ExceptionFilter
   ) {}
 
   public async init() {
-    this.logger.info('App is ready');
-    this.logger.info(`Found PORT: ${this.config.get('PORT')}`);
-
-    this.logger.info('Init database');
+    this.logger.info('Connecting to database...');
     await this.initDb();
-    this.logger.info('Init database completed');
+    this.logger.info('Success!');
+    this.logger.info(`App is running on port ${this.config.get('PORT')}`);
 
     const app = express();
 
     this.configureMiddlewares(app);
 
-    app.use('/users', this.userController.router);
-    app.use('/offers', this.offerController.router);
-    app.use('/offers', this.commentController.router);
+    app.use(this.userController.prefix, this.userController.router);
+    app.use(this.offerController.prefix, this.offerController.router);
+    app.use(this.commentController.prefix, this.commentController.router);
 
     app.use(this.exceptionFilter.handle.bind(this.exceptionFilter));
 
@@ -58,11 +58,11 @@ export class App {
   }
 
   private async configureMiddlewares(app: express.Application) {
+    const loggingMiddleware = new LoggingMiddleware(this.logger);
+
     app.use(express.json());
     app.use(express.static(this.config.get('STATIC_ROOT')));
-    app.use((req, _res, next) => {
-      this.logger.info(`Catch request: ${req.method} ${req.url}`);
-      next();
-    });
+    app.use(cors());
+    app.use(loggingMiddleware.handleAsync.bind(loggingMiddleware));
   }
 }
