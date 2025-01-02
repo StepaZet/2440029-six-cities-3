@@ -3,7 +3,7 @@ import { DocumentType, types } from '@typegoose/typegoose';
 import { Types } from 'mongoose';
 import { OfferRepository } from './offer-repository.interface.js';
 import { inject, injectable } from 'inversify';
-import { DIType } from '../../libs/di/di.enum.js';
+import { DIName } from '../../libs/di/di.enum.js';
 import { OfferEntity } from './enteties.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { OfferDto, UpdateOfferDto } from './dto.js';
@@ -12,8 +12,8 @@ import { CityType } from '../../models/rent-offer.js';
 @injectable()
 export class DefaultOfferRepository implements OfferRepository {
   constructor(
-    @inject(DIType.Logger) private readonly logger: Logger,
-    @inject(DIType.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>
+    @inject(DIName.Logger) private readonly logger: Logger,
+    @inject(DIName.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>
   ) {}
 
   public async checkIdExists(id: Types.ObjectId): Promise<boolean> {

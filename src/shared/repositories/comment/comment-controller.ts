@@ -7,7 +7,7 @@ import { isValidObjectId, Types } from 'mongoose';
 import { StatusCodes } from 'http-status-codes';
 import { ObjectIdValidatorMiddleware } from '../../libs/rest/object-id-validator.middleware.js';
 import { SchemaValidatorMiddleware } from '../../libs/rest/schema-validator.middleware.js';
-import { DIType } from '../../libs/di/di.enum.js';
+import { DIName } from '../../libs/di/di.enum.js';
 import { CommentRepository } from './comment-repository.interface.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { CreateCommentDto, createCommentDtoSchema } from './dto.js';
@@ -20,10 +20,10 @@ import { OfferRepository } from '../offer/offer-repository.interface.js';
 @injectable()
 export class CommentController extends ControllerBase {
   constructor(
-    @inject(DIType.Logger) logger: Logger,
-    @inject(DIType.CommentRepository) private commentRepository: CommentRepository,
-    @inject(DIType.OfferRepository) private offerRepository: OfferRepository,
-    @inject(DIType.Config) private readonly config: Config<AppSchema>
+    @inject(DIName.Logger) logger: Logger,
+    @inject(DIName.CommentRepository) private commentRepository: CommentRepository,
+    @inject(DIName.OfferRepository) private offerRepository: OfferRepository,
+    @inject(DIName.Config) private readonly config: Config<AppSchema>
   ) {
     super(logger);
 

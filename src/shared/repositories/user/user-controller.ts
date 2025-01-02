@@ -3,7 +3,7 @@ import { ControllerBase } from '../../libs/rest/controller-base.js';
 import { HttpMethod } from '../../libs/rest/http-method.enum.js';
 import { Request, Response } from 'express';
 import { plainToInstance } from 'class-transformer';
-import { DIType } from '../../libs/di/di.enum.js';
+import { DIName } from '../../libs/di/di.enum.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { UserRepository } from './user-repository.interface.js';
 import { CreateUserDto, createUserDtoSchema, LoginDto, loginDtoSchema } from './dto.js';
@@ -21,9 +21,9 @@ import { AuthorizeMiddleware } from '../../libs/rest/authorize.middlewate.js';
 @injectable()
 export class UserController extends ControllerBase {
   constructor(
-    @inject(DIType.Logger) logger: Logger,
-    @inject(DIType.UserRepository) private userRepository: UserRepository,
-    @inject(DIType.Config) private config: Config<AppSchema>,
+    @inject(DIName.Logger) logger: Logger,
+    @inject(DIName.UserRepository) private userRepository: UserRepository,
+    @inject(DIName.Config) private config: Config<AppSchema>,
   ) {
     super(logger);
 

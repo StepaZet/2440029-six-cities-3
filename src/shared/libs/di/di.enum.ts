@@ -1,4 +1,4 @@
-export enum DIType {
+export enum DIName {
   App = 'App',
   Logger = 'Logger',
   Config = 'Config',

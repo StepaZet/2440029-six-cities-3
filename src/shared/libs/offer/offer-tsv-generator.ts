@@ -3,7 +3,7 @@ import { OfferTsvParser } from './offer-tsv-parser.js';
 import { AccommodationType, CityType, ConvenienceType, RentOffer } from '../../models/rent-offer.js';
 import { MockServerData } from '../../models/mock-server-data.js';
 import { Generator } from './generator.interface.js';
-import { generateRandomBoolean as getRandomBoolean, getRandomEnumValue, getRandomEnumValues, getRandomInt, getRandomItem, getRandomNumber, getRandomUser } from '../../helpers/random.js';
+import { generateRandomBoolean as getRandomBoolean, getRandomEnumValue, getRandomEnumValues, getRandomInt, getRandomItem, getRandomItems, getRandomNumber, getRandomUser } from '../../helpers/random.js';
 
 const MIN_DAY_OFFSET = 0;
 const MAX_DAY_OFFSET = 14;
@@ -15,13 +15,13 @@ const MIN_RATING = 1.0;
 const MAX_RATING = 5.0;
 
 const MIN_ROOMS = 1;
-const MAX_ROOMS = 6;
+const MAX_ROOMS = 8;
 
 const MIN_GUESTS = 1;
 const MAX_GUESTS = 10;
 
-const MIN_COST = 1_000;
-const MAX_COST = 500_000;
+const MIN_COST = 100;
+const MAX_COST = 100_000;
 
 export class OfferTsvGenerator implements Generator {
   constructor(private readonly mockData: MockServerData) {}
@@ -37,14 +37,13 @@ export class OfferTsvGenerator implements Generator {
         .toDate(),
       city: getRandomEnumValue(CityType),
       previewUrl: `https://six-cities.ru/images/${offerId}/0`,
-      imagesUrls: [
+      imagesUrls: getRandomItems([
         `https://six-cities.ru/images/${offerId}/1`,
         `https://six-cities.ru/images/${offerId}/2`,
         `https://six-cities.ru/images/${offerId}/3`,
         `https://six-cities.ru/images/${offerId}/4`,
         `https://six-cities.ru/images/${offerId}/5`,
-        `https://six-cities.ru/images/${offerId}/6`
-      ],
+      ]),
       isPremium: getRandomBoolean(),
       isFavorite: getRandomBoolean(),
       rating: getRandomNumber(MIN_RATING, MAX_RATING, 1),

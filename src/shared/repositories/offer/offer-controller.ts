@@ -5,7 +5,7 @@ import { Request, Response } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { isValidObjectId, Types } from 'mongoose';
 import { StatusCodes } from 'http-status-codes';
-import { DIType } from '../../libs/di/di.enum.js';
+import { DIName } from '../../libs/di/di.enum.js';
 import { OfferRepository } from './offer-repository.interface.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { CityType } from '../../models/rent-offer.js';
@@ -20,9 +20,9 @@ import { AuthorizeMiddleware } from '../../libs/rest/authorize.middlewate.js';
 @injectable()
 export class OfferController extends ControllerBase {
   constructor(
-    @inject(DIType.Logger) logger: Logger,
-    @inject(DIType.OfferRepository) private offerRepository: OfferRepository,
-    @inject(DIType.Config) private readonly config: Config<AppSchema>
+    @inject(DIName.Logger) logger: Logger,
+    @inject(DIName.OfferRepository) private offerRepository: OfferRepository,
+    @inject(DIName.Config) private readonly config: Config<AppSchema>
   ) {
     super(logger);
     this.addRoute({

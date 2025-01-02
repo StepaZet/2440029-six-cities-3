@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { DocumentType, types } from '@typegoose/typegoose';
 import { inject, injectable } from 'inversify';
-import { DIType } from '../../libs/di/di.enum.js';
+import { DIName } from '../../libs/di/di.enum.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { CommentRepository } from './comment-repository.interface.js';
 import { CommentEntity } from './enteties.js';
@@ -13,9 +13,9 @@ import { Types } from 'mongoose';
 @injectable()
 export class DefaultCommentRepository implements CommentRepository {
   constructor(
-    @inject(DIType.Logger) private readonly logger: Logger,
-    @inject(DIType.CommentModel) private readonly commentModel: types.ModelType<CommentEntity>,
-    @inject(DIType.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>
+    @inject(DIName.Logger) private readonly logger: Logger,
+    @inject(DIName.CommentModel) private readonly commentModel: types.ModelType<CommentEntity>,
+    @inject(DIName.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>
   ) {}
 
   public async checkIdExists(id: Types.ObjectId): Promise<boolean> {

@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { DocumentType, types } from '@typegoose/typegoose';
 import { inject, injectable } from 'inversify';
 import { ObjectId, Types } from 'mongoose';
-import { DIType } from '../../libs/di/di.enum.js';
+import { DIName } from '../../libs/di/di.enum.js';
 import { UserRepository } from './user-repository.interface.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
 import { UserEntity } from './enteties.js';
@@ -12,8 +12,8 @@ import { generatePassword } from '../../helpers/password.js';
 @injectable()
 export class DefaultUserRepository implements UserRepository {
   constructor(
-    @inject(DIType.Logger) private readonly logger: Logger,
-    @inject(DIType.UserModel) private readonly userModel: types.ModelType<UserEntity>
+    @inject(DIName.Logger) private readonly logger: Logger,
+    @inject(DIName.UserModel) private readonly userModel: types.ModelType<UserEntity>
   ) {}
 
   public async checkIdExists(id: Types.ObjectId): Promise<boolean> {
@@ -57,6 +57,7 @@ export class DefaultUserRepository implements UserRepository {
   }
 
   public async updateAvatar(id: ObjectId, avatarPath: string): Promise<void> {
-    await this.userModel.updateOne({ id: id }, { avatarUrl: avatarPath });
+    console.log(id);
+    await this.userModel.findByIdAndUpdate(id, { avatarUrl: avatarPath }).exec();
   }
 }

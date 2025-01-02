@@ -1,5 +1,5 @@
 import { injectable, inject } from 'inversify';
-import { DIType } from '../shared/libs/di/di.enum.js';
+import { DIName } from '../shared/libs/di/di.enum.js';
 import { Logger } from '../shared/libs/logging/logger.interface.js';
 import { Config } from '../shared/libs/config/config.interface.js';
 import { AppSchema } from '../shared/libs/config/app.schema.js';
@@ -13,22 +13,20 @@ import { getMongoUri } from '../shared/helpers/db.js';
 @injectable()
 export class App {
   constructor(
-    @inject(DIType.Logger) private readonly logger: Logger,
-    @inject(DIType.Config) private readonly config: Config<AppSchema>,
-    @inject(DIType.DBClient) private readonly databaseClient: DBClient,
-    @inject(DIType.UserController) private readonly userController: Controller,
-    @inject(DIType.OfferController) private readonly offerController: Controller,
-    @inject(DIType.CommentController) private readonly commentController: Controller,
-    @inject(DIType.ExceptionFilter) private readonly exceptionFilter: ExceptionFilter
+    @inject(DIName.Logger) private readonly logger: Logger,
+    @inject(DIName.Config) private readonly config: Config<AppSchema>,
+    @inject(DIName.DBClient) private readonly databaseClient: DBClient,
+    @inject(DIName.UserController) private readonly userController: Controller,
+    @inject(DIName.OfferController) private readonly offerController: Controller,
+    @inject(DIName.CommentController) private readonly commentController: Controller,
+    @inject(DIName.ExceptionFilter) private readonly exceptionFilter: ExceptionFilter
   ) {}
 
   public async init() {
-    this.logger.info('App is ready');
-    this.logger.info(`Found PORT: ${this.config.get('PORT')}`);
-
-    this.logger.info('Init database');
+    this.logger.info('Connecting to database...');
     await this.initDb();
-    this.logger.info('Init database completed');
+    this.logger.info('Success!');
+    this.logger.info(`App is running on port ${this.config.get('PORT')}`);
 
     const app = express();
 
@@ -61,7 +59,7 @@ export class App {
     app.use(express.json());
     app.use(express.static(this.config.get('STATIC_ROOT')));
     app.use((req, _res, next) => {
-      this.logger.info(`Catch request: ${req.method} ${req.url}`);
+      this.logger.info(`Handled request: ${req.method} ${req.url} ${_res.statusCode}`);
       next();
     });
   }

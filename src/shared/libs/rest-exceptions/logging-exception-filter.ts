@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { HttpError } from './http-error.js';
-import { DIType } from '../di/di.enum.js';
+import { DIName } from '../di/di.enum.js';
 import { Logger } from '../logging/logger.interface.js';
 import { ExceptionFilter } from './exception-filter.interface.js';
 
@@ -10,7 +10,7 @@ import { ExceptionFilter } from './exception-filter.interface.js';
 @injectable()
 export class LoggingExceptionFilter implements ExceptionFilter {
   constructor(
-    @inject(DIType.Logger) private logger: Logger
+    @inject(DIName.Logger) private logger: Logger
   ) {}
 
   handle(err: Error, _req: Request, res: Response, _next: NextFunction): void {
