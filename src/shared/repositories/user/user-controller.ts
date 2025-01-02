@@ -75,6 +75,13 @@ export class UserController extends ControllerBase {
   private async register(req: Request, res: Response): Promise<void> {
     const dto = plainToInstance(CreateUserDto, req.body as object);
 
+    const existedUser = await this.userRepository.findByEmail(dto.email);
+
+    if (existedUser) {
+      const error = `User with email ${dto.email} already exists`;
+      throw new HttpError(StatusCodes.CONFLICT, error);
+    }
+
     const avatarPath = req.file?.path;
     if (avatarPath) {
       dto.avatarUrl = avatarPath;
