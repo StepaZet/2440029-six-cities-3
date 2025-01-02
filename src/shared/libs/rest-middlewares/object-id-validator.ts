@@ -6,7 +6,7 @@ import { Middleware } from './middleware.interface.js';
 import { CheckIdRepository } from '../rest/check-id-repository.interface.js';
 import { HttpError } from '../rest-exceptions/http-error.js';
 
-export class ObjectIdValidatorMiddleware implements Middleware {
+export class ObjectExistingValidatorMiddleware implements Middleware {
   constructor(
     private service: CheckIdRepository,
     private param: string
@@ -18,7 +18,7 @@ export class ObjectIdValidatorMiddleware implements Middleware {
     if (!isValidObjectId(value)) {
       throw new HttpError(
         StatusCodes.BAD_REQUEST,
-        `${this.param} is invalid ObjectID`
+        `${this.param} isn't ObjectID`
       );
     }
 

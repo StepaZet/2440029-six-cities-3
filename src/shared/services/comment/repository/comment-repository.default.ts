@@ -1,12 +1,12 @@
 import 'reflect-metadata';
 import { DocumentType, types } from '@typegoose/typegoose';
 import { inject, injectable } from 'inversify';
-import { DIName } from '../../libs/di/di.enum.js';
-import { Logger } from '../../libs/logging/logger.interface.js';
+import { DIName } from '../../../libs/di/di.enum.js';
+import { Logger } from '../../../libs/logging/logger.interface.js';
 import { CommentRepository } from './comment-repository.interface.js';
-import { CommentEntity } from './enteties.js';
-import { OfferEntity } from '../offer/enteties.js';
-import { CreateCommentDto } from './dto.js';
+import { CommentEntity } from '../enteties.js';
+import { OfferEntity } from '../../offer/enteties.js';
+import { CreateCommentDto } from '../dto.js';
 import { Types } from 'mongoose';
 
 
@@ -29,12 +29,12 @@ export class DefaultCommentRepository implements CommentRepository {
     const aggregation = await this.commentModel.aggregate([{'$match': {offerId: String(dto.offerId)}}, {'$group': {_id: null, count: {'$sum': 1}, average: {'$avg': '$rating'}}}]).exec();
     await this.offerModel.findByIdAndUpdate(dto.offerId, {commentCount: aggregation[0].count, rating: aggregation[0].average}).exec();
 
-    this.logger.info(`New comment created: ${result._id}`);
+    this.logger.info(`Created comment ${result._id}`);
 
     return result;
   }
 
-  public async findAllForOffer(offerId: Types.ObjectId, limit: number, skip: number): Promise<DocumentType<CommentEntity>[]> {
-    return await this.commentModel.find({offerId: {$eq: offerId}}).populate('authorId').skip(skip).limit(limit).exec();
+  public async findByOffer(offerId: Types.ObjectId, limit: number, offset: number): Promise<DocumentType<CommentEntity>[]> {
+    return await this.commentModel.find({offerId: {$eq: offerId}}).populate('authorId').skip(offset).limit(limit).exec();
   }
 }

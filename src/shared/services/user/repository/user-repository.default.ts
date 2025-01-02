@@ -2,12 +2,12 @@ import 'reflect-metadata';
 import { DocumentType, types } from '@typegoose/typegoose';
 import { inject, injectable } from 'inversify';
 import { ObjectId, Types } from 'mongoose';
-import { DIName } from '../../libs/di/di.enum.js';
+import { DIName } from '../../../libs/di/di.enum.js';
 import { UserRepository } from './user-repository.interface.js';
-import { Logger } from '../../libs/logging/logger.interface.js';
-import { UserEntity } from './enteties.js';
-import { CreateUserDto } from './dto.js';
-import { generatePassword } from '../../helpers/password.js';
+import { Logger } from '../../../libs/logging/logger.interface.js';
+import { UserEntity } from '../enteties.js';
+import { CreateUserDto } from '../dto.js';
+import { generatePassword } from '../../../helpers/password.js';
 
 @injectable()
 export class DefaultUserRepository implements UserRepository {

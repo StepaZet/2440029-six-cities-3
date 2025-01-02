@@ -5,10 +5,10 @@ import { Request, Response } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { DIName } from '../../libs/di/di.enum.js';
 import { Logger } from '../../libs/logging/logger.interface.js';
-import { UserRepository } from './user-repository.interface.js';
+import { UserRepository } from './repository/user-repository.interface.js';
 import { CreateUserDto, createUserDtoSchema, LoginDto, loginDtoSchema } from './dto.js';
 import { SchemaValidatorMiddleware } from '../../libs/rest-middlewares/schema-validator.js';
-import { ObjectIdValidatorMiddleware } from '../../libs/rest-middlewares/object-id-validator.js';
+import { ObjectExistingValidatorMiddleware } from '../../libs/rest-middlewares/object-id-validator.js';
 import { UploadFileMiddleware } from '../../libs/rest-middlewares/upload-file.js';
 import { Config } from '../../libs/config/config.interface.js';
 import { AppSchema } from '../../libs/config/app.schema.js';
@@ -50,9 +50,17 @@ export class UserController extends ControllerBase {
       httpMethod: HttpMethod.Post,
       handleAsync: this.loadAvatar.bind(this),
       middlewares: [
-        new ObjectIdValidatorMiddleware(this.userRepository, 'id'),
+        new ObjectExistingValidatorMiddleware(this.userRepository, 'id'),
         new AuthorizeMiddleware(this.config.get('JWT_SECRET')),
         new UploadFileMiddleware(this.config.get('STATIC_ROOT'), 'avatar')
+      ]
+    });
+    this.addRoute({
+      path: '/check_session',
+      httpMethod: HttpMethod.Get,
+      handleAsync: this.getUser.bind(this),
+      middlewares: [
+        new AuthorizeMiddleware(this.config.get('JWT_SECRET')),
       ]
     });
   }
@@ -93,7 +101,6 @@ export class UserController extends ControllerBase {
     this.created(res, user);
   }
 
-
   private async login(req: Request, res: Response): Promise<void> {
     const dto = plainToInstance(LoginDto, req.body as object);
 
@@ -104,5 +111,21 @@ export class UserController extends ControllerBase {
 
     const accessToken = await getToken({ userId: user.id }, this.config.get('JWT_SECRET'));
     this.ok(res, { accessToken });
+  }
+
+  private async getUser(_req: Request, res: Response): Promise<void> {
+    const { userId } = res.locals;
+
+    const user = await this.userRepository.findById(userId);
+
+    if (user === null) {
+      this.notFound(res, `User with id ${userId} not found`);
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...restData} = user.toObject();
+
+    this.ok(res, restData);
   }
 }

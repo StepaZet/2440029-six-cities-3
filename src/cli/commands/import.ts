@@ -6,12 +6,12 @@ import { ConsoleLogger } from '../../shared/libs/logging/console.logger.js';
 import { Logger } from '../../shared/libs/logging/logger.interface.js';
 import { OfferTsvParser } from '../../shared/libs/offer/offer-tsv-parser.js';
 import { RentOffer } from '../../shared/models/rent-offer.js';
-import { DefaultOfferRepository } from '../../shared/repositories/offer/default.offer-repository.js';
-import { OfferModel } from '../../shared/repositories/offer/enteties.js';
-import { OfferRepository } from '../../shared/repositories/offer/offer-repository.interface.js';
-import { DefaultUserRepository } from '../../shared/repositories/user/default.user-repository.js';
-import { UserModel } from '../../shared/repositories/user/enteties.js';
-import { UserRepository } from '../../shared/repositories/user/user-repository.interface.js';
+import { DefaultOfferRepository } from '../../shared/services/offer/repository/offer-repository.default.js';
+import { OfferModel } from '../../shared/services/offer/enteties.js';
+import { OfferRepository } from '../../shared/services/offer/repository/offer-repository.interface.js';
+import { DefaultUserRepository } from '../../shared/services/user/repository/user-repository.default.js';
+import { UserModel } from '../../shared/services/user/enteties.js';
+import { UserRepository } from '../../shared/services/user/repository/user-repository.interface.js';
 import { Command } from './command.interface.js';
 
 

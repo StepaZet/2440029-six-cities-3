@@ -1,9 +1,9 @@
 import { Container } from 'inversify';
 import { types } from '@typegoose/typegoose';
 import { Controller } from '../../libs/rest/controller.interface.js';
-import { CommentController } from './comment-controller.js';
-import { CommentRepository } from './comment-repository.interface.js';
-import { DefaultCommentRepository } from './default.comment-repository.js';
+import { CommentController } from './controller.js';
+import { CommentRepository } from './repository/comment-repository.interface.js';
+import { DefaultCommentRepository } from './repository/comment-repository.default.js';
 import { CommentEntity, CommentModel } from './enteties.js';
 import { DIName } from '../../libs/di/di.enum.js';
 

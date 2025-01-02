@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { Types } from 'mongoose';
 import { AccommodationType, CityType, ConvenienceType } from '../../models/rent-offer.js';
 
-export class UpdateOfferDto {
+export class CreateOrUpdateOfferDto {
   public name!: string;
   public description!: string;
   public city!: CityType;
@@ -19,11 +19,11 @@ export class UpdateOfferDto {
   public longitude!: number;
 }
 
-export class OfferDto extends UpdateOfferDto {
+export class OfferDto extends CreateOrUpdateOfferDto {
   public authorId!: Types.ObjectId;
 }
 
-export const updateOfferDtoSchema = Joi.object({
+export const createOrUpdateOfferDtoSchema = Joi.object({
   name: Joi.string().min(10).max(100).required(),
   description: Joi.string().min(20).max(1024).required(),
   createdAt: Joi.date().required(),
@@ -39,4 +39,3 @@ export const updateOfferDtoSchema = Joi.object({
   latitude: Joi.number().min(-90).max(90).required(),
   longitude: Joi.number().min(-180).max(180).required()
 });
-

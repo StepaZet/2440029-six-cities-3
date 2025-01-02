@@ -56,6 +56,10 @@ export abstract class ControllerBase implements Controller {
     res.send(data);
   }
 
+  public notFound<T>(res: Response, data: T): void {
+    this.send(res, StatusCodes.NOT_FOUND, data);
+  }
+
   public ok<T>(res: Response, data: T): void {
     this.send(res, StatusCodes.OK, data);
   }

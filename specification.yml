@@ -3,7 +3,7 @@ info:
   title: 'Six Cities'
   version: '1.0'
 servers:
-  - url: http://localhost:3000/v1
+  - url: http://127.0.0.1:8000
 paths:
   /offers:
     post:
@@ -11,14 +11,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOffer'
+              $ref: '#/components/schemas/CreateOrUpdateOffer'
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OfferDetails'
+                $ref: '#/components/schemas/Offer'
         '401':
           description: Unauthorized
         '403':
@@ -33,7 +33,7 @@ paths:
           in: query
           schema:
             type: integer
-        - name: skip
+        - name: offset
           in: query
           schema:
             type: integer
@@ -55,14 +55,14 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OfferDetails'
+                $ref: '#/components/schemas/Offer'
       tags:
         - Offers
     put:
@@ -71,19 +71,19 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PutOffer'
+              $ref: '#/components/schemas/CreateOrUpdateOffer'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OfferDetails'
+                $ref: '#/components/schemas/Offer'
         '401':
           description: Unauthorized
         '403':
@@ -100,8 +100,8 @@ paths:
           schema:
             type: integer
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: Success
         '401':
           description: Unauthorized
         '403':
@@ -110,14 +110,14 @@ paths:
           description: Bad Request
       tags:
         - Offers
-  /offers/premium/{cityId}:
+  /offers/premium/{cityName}:
     get:
       parameters:
-        - name: cityId
+        - name: cityName
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: OK
@@ -128,7 +128,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Offer'
       tags:
-        - Premium Offers
+        - Offers
   /offers/favourite:
     get:
       responses:
@@ -143,7 +143,7 @@ paths:
         '401':
           description: Unauthorized
       tags:
-        - Favourite Offers
+        - Favourite
   /offers/favourite/{id}:
     post:
       parameters:
@@ -151,7 +151,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: OK
@@ -160,19 +160,19 @@ paths:
         '400':
           description: Bad Request
       tags:
-        - Favourite Offers
+        - Favourite
     delete:
       parameters:
         - name: id
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '204':
           description: No Content
       tags:
-        - Favourite Offers
+        - Favourite
   /offers/{id}/comments:
     get:
       parameters:
@@ -180,14 +180,16 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Comment"
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
       tags:
         - Comments
     post:
@@ -196,7 +198,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
@@ -217,7 +219,8 @@ paths:
           description: Bad Request
       tags:
         - Comments
-  /users:
+
+  /users/register:
     post:
       requestBody:
         content:
@@ -231,14 +234,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-        '403':
-          description: Forbidden
         '400':
           description: Bad Request
+        '409':
+          description: Conflict
       tags:
         - Users
-  /login:
+  /users/login:
     post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
       responses:
         '201':
           description: Created
@@ -246,52 +254,54 @@ paths:
           description: Unauthorized
       tags:
         - Users
-  /logout:
-    delete:
-      parameters:
-        - name: X-Token
-          in: header
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: No Content
-        '401':
-          description: Unauthorized
-      tags:
-        - Users
-  /check-session:
+
+  /users/check_session:
     get:
-      parameters:
-        - name: X-Token
-          in: header
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/UserWithoutPassword"
+        '401':
+          description: Unauthorized
       tags:
         - Users
 
 components:
   schemas:
-    User:
+    Login:
       type: object
       required:
-        - id
-        - name
         - email
         - password
-        - userType
       properties:
-        id:
-          type: integer
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+          maxLength: 12
+    UserWithoutPassword:
+      type: object
+      required:
+        - _id
+        - name
+        - email
+        - type
+        - createdAt
+        - updateddAt
+      properties:
+        _id:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updateddAt:
+          type: string
+          format: date-time
         name:
           type: string
           minLength: 1
@@ -301,10 +311,47 @@ components:
           format: email
         avatarUrl:
           type: string
-        userType:
+        type:
           type: string
           enum:
-            - Basic
+            - Common
+            - Pro
+    User:
+      type: object
+      required:
+        - _id
+        - name
+        - email
+        - password
+        - type
+        - createdAt
+        - updateddAt
+      properties:
+        _id:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updateddAt:
+          type: string
+          format: date-time
+        name:
+          type: string
+          minLength: 1
+          maxLength: 15
+        email:
+          type: string
+          format: email
+        avatarUrl:
+          type: string
+        password:
+          type: string
+          minLength: 6
+          maxLength: 12
+        type:
+          type: string
+          enum:
+            - Common
             - Pro
     CreateUser:
       type: object
@@ -312,7 +359,7 @@ components:
         - name
         - email
         - password
-        - userType
+        - type
       properties:
         name:
           type: string
@@ -327,10 +374,10 @@ components:
           type: string
           minLength: 6
           maxLength: 12
-        userType:
+        type:
           type: string
           enum:
-            - Basic
+            - Common
             - Pro
     Comment:
       type: object
@@ -338,28 +385,26 @@ components:
         - text
         - createdAt
         - rating
-        - author_id
+        - authorId
       properties:
+        createdAt:
+          type: string
+          format: date-time
         text:
           type: string
           minLength: 5
           maxLength: 1024
-        createdAt:
-          type: string
-          format: date-time
         rating:
           type: number
           minimum: 0
           maximum: 5
-        author_id:
-          type: integer
-          minimum: 0
+        authorId:
+          type: string
     CreateComment:
       type: object
       required:
         - text
         - rating
-        - author_id
       properties:
         text:
           type: string
@@ -369,71 +414,10 @@ components:
           type: number
           minimum: 0
           maximum: 5
-        author_id:
-          type: integer
-          minimum: 0
     Offer:
       type: object
       required:
-        - id
-        - name
-        - createdAt
-        - city
-        - previewUrl
-        - isPremium
-        - isFavorite
-        - rating
-        - accommodationType
-        - rentPrice
-        - commentCount
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-          minLength: 10
-          maxLength: 100
-        createdAt:
-          type: string
-          format: date-time
-        city:
-          type: string
-          enum:
-            - Paris
-            - Cologne
-            - Brussels
-            - Amsterdam
-            - Hamburg
-            - Dusseldorf
-        previewUrl:
-          type: string
-          format: uri
-        isPremium:
-          type: boolean
-        isFavorite:
-          type: boolean
-        rating:
-          type: number
-          minimum: 0
-          maximum: 5
-        accommodationType:
-          type: string
-          enum:
-            - apartment
-            - house
-            - room
-            - hotel
-        rentPrice:
-          type: number
-          minimum: 100
-          maximum: 100000
-        commentCount:
-          type: integer
-          minimum: 0
-    OfferDetails:
-      type: object
-      required:
-        - id
+        - _id
         - name
         - description
         - createdAt
@@ -441,17 +425,17 @@ components:
         - previewUrl
         - imagesUrls
         - isPremium
-        - isFavorite
         - rating
         - accommodationType
-        - roomsCount
+        - roomCount
         - guestCount
         - rentPrice
         - conveniences
-        - author_id
+        - authorId
         - commentCount
         - latitude
         - longitude
+        - favouriteUsers
       properties:
         id:
           type: integer
@@ -500,7 +484,7 @@ components:
             - house
             - room
             - hotel
-        roomsCount:
+        roomCount:
           type: integer
           minimum: 1
           maximum: 8
@@ -524,9 +508,8 @@ components:
               - Washer
               - Towels
               - Fridge
-        author_id:
-          type: integer
-          minimum: 0
+        authorId:
+          type: string
         latitude:
           type: number
           minimum: -90
@@ -538,7 +521,11 @@ components:
         commentCount:
           type: integer
           minimum: 0
-    CreateOffer:
+        favouriteUsers:
+          type: array
+          items:
+            type: string
+    CreateOrUpdateOffer:
       type: object
       required:
         - name
@@ -548,11 +535,10 @@ components:
         - imagesUrls
         - isPremium
         - accommodationType
-        - roomsCount
+        - roomCount
         - guestCount
         - rentPrice
         - conveniences
-        - author_id
         - latitude
         - longitude
       properties:
@@ -592,7 +578,7 @@ components:
             - house
             - room
             - hotel
-        roomsCount:
+        roomCount:
           type: integer
           minimum: 1
           maximum: 8
@@ -616,98 +602,6 @@ components:
               - Washer
               - Towels
               - Fridge
-        author_id:
-          type: integer
-          minimum: 0
-        latitude:
-          type: number
-          minimum: -90
-          maximum: 90
-        longitude:
-          type: number
-          minimum: -180
-          maximum: 180
-    PutOffer:
-      type: object
-      required:
-        - name
-        - description
-        - city
-        - previewUrl
-        - imagesUrls
-        - isPremium
-        - accommodationType
-        - roomsCount
-        - guestCount
-        - rentPrice
-        - conveniences
-        - author_id
-        - latitude
-        - longitude
-      properties:
-        name:
-          type: string
-          minLength: 10
-          maxLength: 100
-        description:
-          type: string
-          minLength: 20
-          maxLength: 1024
-        city:
-          type: string
-          enum:
-            - Paris
-            - Cologne
-            - Brussels
-            - Amsterdam
-            - Hamburg
-            - Dusseldorf
-        previewUrl:
-          type: string
-          format: uri
-        imagesUrls:
-          type: array
-          minLength: 6
-          maxLength: 6
-          items:
-            type: string
-            format: uri
-        isPremium:
-          type: boolean
-        accommodationType:
-          type: string
-          enum:
-            - apartment
-            - house
-            - room
-            - hotel
-        roomsCount:
-          type: integer
-          minimum: 1
-          maximum: 8
-        guestCount:
-          type: integer
-          minimum: 1
-          maximum: 10
-        rentPrice:
-          type: number
-          minimum: 100
-          maximum: 100000
-        conveniences:
-          type: array
-          items:
-            type: string
-            enum:
-              - Breakfast
-              - Air conditioning
-              - Laptop friendly workspace
-              - Baby seat
-              - Washer
-              - Towels
-              - Fridge
-        author_id:
-          type: integer
-          minimum: 0
         latitude:
           type: number
           minimum: -90
